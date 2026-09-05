@@ -38,6 +38,7 @@
     if (!(Number.isFinite(s.bookMax) && s.bookMax >= 0)) s.bookMax = DEFAULT_BOOK_MAX;
     if (!(Number.isFinite(s.bookMin) && s.bookMin >= 0)) s.bookMin = DEFAULT_BOOK_MIN;
     if (!Array.isArray(s.hearts)) s.hearts = [];
+    if (!Array.isArray(s.poop)) s.poop = [];
     if (!(Number.isInteger(s.rareStep) && s.rareStep >= 0 && s.rareStep < RARE_STEPS.length)) s.rareStep = DEFAULT_RARE_STEP;
     return s;
   }
@@ -106,11 +107,21 @@
   }
   const rareLimit = () => RARE_STEPS[settings.rareStep];
   const isRareSource = (id) => sourceRate(id) < rareLimit();
+  const POOP_PENALTY_H = 12;   // 💩: innlegg skyves ned som om de var eldre
+  const POOP_KEEP_EVERY = 4;   // 💩: bare hvert fjerde innlegg vises
   function boostHours(it) {
+    if (settings.poop.includes(it.source)) return -POOP_PENALTY_H;
     const rate = Math.max(0.5, sourceRate(it.source));
     let boost = rate >= FREQUENT_PER_WEEK ? 0 : BOOST_PER_HALVING_H * Math.log2(FREQUENT_PER_WEEK / rate);
     if (settings.hearts.includes(it.source)) boost = boost * 1.5 + 3; // hjerte: mer løft, men sjeldne uten hjerte slår hyppige med hjerte
     return Math.min(MAX_BOOST_H, boost);
+  }
+  // Stabil «tynning» av 💩-kilder: samme innlegg beholdes/utelates hver gang.
+  function poopKeeps(it) {
+    if (!settings.poop.includes(it.source)) return true;
+    let h = 0;
+    for (let i = 0; i < it.id.length; i++) h = (h * 31 + it.id.charCodeAt(i)) >>> 0;
+    return h % POOP_KEEP_EVERY === 0;
   }
   function effectiveTime(it) {
     return new Date(it.time).getTime() + boostHours(it) * 3600e3;
@@ -306,7 +317,7 @@
     const uniq = items.filter((it) => (seen.has(it.id) ? false : (seen.add(it.id), true)));
     uniq.sort((a, b) => (a.time < b.time ? 1 : a.time > b.time ? -1 : 0));
     computeRateFallback(uniq);
-    const visible = uniq.filter((it) => !hidden.has(it.source));
+    const visible = uniq.filter((it) => !hidden.has(it.source) && poopKeeps(it));
     const limit = want + (state.extraDays ? Infinity : 0);
     state.items = Number.isFinite(limit) ? visible.slice(0, limit) : visible;
     applyOrder();
@@ -385,6 +396,7 @@
     const meta = [];
     meta.push(`<span class="tag${it.severity ? ' sev-' + esc(it.severity) : ''}">${esc(src.short || src.name)}</span>`);
     if (settings.hearts.includes(it.source)) meta.push('<span class="heart-mark" title="Prioritert kilde">♥</span>');
+    if (settings.poop.includes(it.source)) meta.push('<span title="Nedprioritert kilde">💩</span>');
     if (rare) meta.push('<span class="rare-mark" title="Kilde som publiserer sjelden">sjelden</span>');
     meta.push(`<time datetime="${esc(it.time)}" title="${new Date(it.time).toLocaleString('nb-NO')}">${fmtTime(it.time)}</time>`);
     if (it.author) meta.push(`<span>${esc(it.author)}</span>`);
@@ -514,6 +526,7 @@
       groups.get(g).push(s);
     }
     const hearts = new Set(settings.hearts);
+    const poop = new Set(settings.poop);
     const sections = [...groups].map(([g, list]) => {
       const rows = list.map((s) => {
         const dot = s.ok === false ? 'err' : s.warn ? 'warn' : s.ok ? 'ok' : '';
@@ -526,10 +539,12 @@
           info = s.error ? `Feil: ${s.error}` : s.warn ? `${rateTxt} · ${s.warn}` : s.lastOk ? `${rateTxt} · hentet ${fmtRel(s.lastOk)}` : `${rateTxt} · ikke hentet ennå`;
         }
         const heart = isBook ? '' : `<button type="button" class="heart${hearts.has(s.id) ? ' on' : ''}" data-heart="${esc(s.id)}" aria-pressed="${hearts.has(s.id)}" title="Prioriter denne kilden" aria-label="Prioriter ${esc(s.name)}">${hearts.has(s.id) ? '♥' : '♡'}</button>`;
+        const poopBtn = isBook ? '' : `<button type="button" class="poop${poop.has(s.id) ? ' on' : ''}" data-poop="${esc(s.id)}" aria-pressed="${poop.has(s.id)}" title="Nedprioriter: vis bare litt innimellom" aria-label="Nedprioriter ${esc(s.name)}">💩</button>`;
+        if (!isBook && poop.has(s.id)) info += ' · 💩 vises sjelden';
         return `<li${!isBook && isRareSource(s.id) ? ' class="rare-row"' : ''}>
           <label><input type="checkbox" data-src="${esc(s.id)}" ${hidden.has(s.id) ? '' : 'checked'}>
             <span><span class="tag">${esc(s.short || s.name)}</span> ${esc(s.name)}<br><span class="meta">${esc(info)}</span></span></label>
-          ${heart}
+          ${heart}${poopBtn}
           <span class="dot ${dot}" title="${esc(info)}"></span>
         </li>`;
       });
@@ -575,12 +590,23 @@
     panelEl.querySelectorAll('button[data-heart]').forEach((b) => b.addEventListener('click', () => {
       const id = b.dataset.heart;
       settings.hearts = settings.hearts.includes(id) ? settings.hearts.filter((x) => x !== id) : [...settings.hearts, id];
+      settings.poop = settings.poop.filter((x) => x !== id); // hjerte og 💩 utelukker hverandre
       saveSettings();
       const scroll = panelEl.scrollTop;
       renderPanel();
       panelEl.scrollTop = scroll;
       applyOrder();
       renderReset();
+    }));
+    panelEl.querySelectorAll('button[data-poop]').forEach((b) => b.addEventListener('click', () => {
+      const id = b.dataset.poop;
+      settings.poop = settings.poop.includes(id) ? settings.poop.filter((x) => x !== id) : [...settings.poop, id];
+      settings.hearts = settings.hearts.filter((x) => x !== id);
+      saveSettings();
+      const scroll = panelEl.scrollTop;
+      renderPanel();
+      panelEl.scrollTop = scroll;
+      loadFeed({ keepScroll: true }); // tynningen endrer hvilke innlegg som er med
     }));
     const slider = $('#rareSlider');
     slider.addEventListener('input', () => {
@@ -630,8 +656,41 @@
     $('#sourcesBtn').setAttribute('aria-expanded', 'false');
     $('#sourcesBtn').classList.remove('active');
   }
-  $('#sourcesBtn').addEventListener('click', () => (panelEl.hidden ? openPanel() : closePanel()));
-  window.addEventListener('resize', () => { if (!panelEl.hidden) positionPanel(); });
+  $('#sourcesBtn').addEventListener('click', () => { closeAbout(); panelEl.hidden ? openPanel() : closePanel(); });
+  window.addEventListener('resize', () => { if (!panelEl.hidden) positionPanel(); if (!aboutEl.hidden) aboutEl.style.top = $('#top').offsetHeight + 'px'; });
+
+  // ---------- Om ----------
+  const aboutEl = $('#aboutPanel');
+  // Adressen settes sammen først når noen faktisk sender, og finnes ikke i klartekst i koden.
+  const addrParts = [[97, 112, 112], [106, 97, 110, 45, 101, 114, 105, 107], [99, 111, 109]];
+  const contactAddress = () => {
+    const [u, d, t] = addrParts.map((a) => String.fromCharCode(...a));
+    return `${u}${String.fromCharCode(64)}${d}${String.fromCharCode(46)}${t}`;
+  };
+  function openAbout() {
+    closePanel();
+    aboutEl.style.top = $('#top').offsetHeight + 'px';
+    aboutEl.hidden = false;
+    $('#aboutBtn').classList.add('active');
+    $('#aboutBtn').setAttribute('aria-expanded', 'true');
+    aboutEl.scrollTop = 0;
+  }
+  function closeAbout() {
+    aboutEl.hidden = true;
+    $('#aboutBtn').classList.remove('active');
+    $('#aboutBtn').setAttribute('aria-expanded', 'false');
+  }
+  $('#aboutBtn').addEventListener('click', () => (aboutEl.hidden ? openAbout() : closeAbout()));
+  $('#aboutClose').addEventListener('click', closeAbout);
+  $('#contactForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const from = $('#contactEmail').value.trim();
+    const msg = $('#contactMsg').value.trim();
+    if (!msg) { $('#contactMsg').focus(); return; }
+    const body = `Fra: ${from || '(ikke oppgitt)'}\nEnhet: ${settings.device}\n\n${msg}`;
+    window.location.href = `mailto:${contactAddress()}?subject=${encodeURIComponent('Bedeem: forslag/kommentar')}&body=${encodeURIComponent(body)}`;
+    $('#contactNote').textContent = 'E-postprogrammet ditt skal nå ha åpnet seg med meldingen klar til sending.';
+  });
 
   // ---------- Oppdater / nett ----------
   $('#refresh').addEventListener('click', async () => {

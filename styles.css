@@ -188,6 +188,31 @@ button { font: inherit; }
   cursor: pointer;
 }
 .heart.on { color: var(--err); }
+.poop {
+  flex: none;
+  min-width: 44px; min-height: 44px;
+  border: 0; background: none;
+  font-size: 22px;
+  cursor: pointer;
+  filter: grayscale(1);
+  opacity: .45;
+}
+.poop.on { filter: none; opacity: 1; }
+.brandrow { display: flex; align-items: baseline; gap: 12px; }
+.linkbtn { border: 0; background: none; color: var(--accent); font-size: 15px; font-weight: 600; cursor: pointer; padding: 6px 4px; min-height: 32px; }
+.linkbtn.active { text-decoration: underline; }
+.about p { margin: 0 0 .8rem; }
+.contact { display: flex; flex-direction: column; gap: 6px; margin-top: 1rem; padding-top: .8rem; border-top: 1px solid var(--line); }
+.contact label { font-weight: 600; font-size: .9rem; }
+.contact input, .contact textarea {
+  font: inherit; font-size: 1rem;
+  padding: 10px 12px;
+  border: 1px solid var(--btn-border); border-radius: 10px;
+  background: var(--btn); color: var(--btn-fg);
+  min-height: 44px;
+}
+.contact textarea { resize: vertical; }
+.contact .btn { align-self: flex-start; margin-top: 4px; }
 .panel li.rare-row .tag { box-shadow: inset 0 0 0 2px var(--err); }
 .rarebox { margin: .4rem 0 .6rem; padding: .6rem .8rem; border: 1px solid var(--line); border-radius: 10px; }
 .rarebox label { display: block; font-size: .95rem; }
