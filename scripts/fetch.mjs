@@ -651,6 +651,64 @@ async function fetchEntur(src, existing) {
   }
   return { items: [...seen.values()] };
 }
+// --- Politiloggen (politiet.no). Én tråd per hendelse; oppdateringer vises som svar.
+async function fetchPolitiloggen(src, existing) {
+  const take = 50; // API-et godtar maks 50 per side; 'skip' blar videre
+  const pages = src.pages || (src.municipalities?.length ? 4 : 2);
+  const raw = [];
+  for (let p = 0; p < pages; p++) {
+    const params = new URLSearchParams();
+    for (const d of src.districts || []) params.append('districts', d);
+    params.set('take', String(take));
+    params.set('skip', String(p * take));
+    const { text, status } = await fetchText(`https://api.politiloggen.politiet.no/messages/?${params}`, { headers: { Accept: 'application/json' } });
+    if (status !== 200) throw new Error(`HTTP ${status}: ${text.slice(0, 160)}`);
+    const json = JSON.parse(text);
+    raw.push(...(json.messages || []));
+    if (!json.hasMoreResults) break;
+    await sleep(300);
+  }
+  const wanted = (src.municipalities || []).map((m) => m.toLowerCase());
+  const msgs = raw.filter((m) => !wanted.length || wanted.includes(String(m.municipality || '').toLowerCase()));
+  const byThread = new Map();
+  for (const m of msgs) {
+    if (!byThread.has(m.threadId)) byThread.set(m.threadId, []);
+    byThread.get(m.threadId).push(m);
+  }
+  const items = [];
+  for (const [threadId, list] of byThread) {
+    const id = `${src.id}:${threadId}`;
+    const prev = existing.get(id);
+    // Slå sammen med meldinger vi har fra før (API-et gir bare de nyeste).
+    const all = new Map();
+    if (prev) {
+      all.set(prev.firstId || `${threadId}-0`, { id: prev.firstId || `${threadId}-0`, text: prev.body, createdOn: prev.time });
+      for (const c of prev.comments || []) all.set(c.id, { id: c.id, text: c.body, createdOn: c.time });
+    }
+    for (const m of list) all.set(m.id, { id: m.id, text: m.text, createdOn: m.createdOn });
+    const sorted = [...all.values()].sort((a, b) => (a.createdOn < b.createdOn ? -1 : 1));
+    const first = sorted[0];
+    const latest = list.sort((a, b) => (a.createdOn < b.createdOn ? 1 : -1))[0];
+    const place = latest.area && latest.area !== latest.municipality ? `${latest.area} (${latest.municipality})` : latest.municipality;
+    items.push({
+      id,
+      source: src.id,
+      title: `${latest.category || 'Melding'} · ${place}`,
+      url: src.url || 'https://www.politiet.no/politiloggen/',
+      time: iso(parseDate(first.createdOn)),
+      updated: iso(parseDate(latest.createdOn)),
+      author: (latest.district || '').replace(/ Politidistrikt$/i, ' politidistrikt'),
+      category: latest.category,
+      body: truncate((first.text || '').trim(), LIMITS.bodyChars),
+      firstId: first.id,
+      comments: sorted.slice(1).map((m) => ({ id: m.id, author: 'Politiet', time: iso(parseDate(m.createdOn)), body: truncate((m.text || '').trim(), LIMITS.commentChars), depth: 0 })),
+      commentCount: sorted.length - 1,
+      active: !!latest.isActive,
+    });
+  }
+  return { items };
+}
+
 // --- CISA Known Exploited Vulnerabilities (JSON-katalog).
 async function fetchCisaKev(src) {
   const { text, status } = await fetchText(src.url, { headers: { Accept: 'application/json' } });
@@ -714,7 +772,8 @@ const dayKey = (isoStr) => isoStr.slice(0, 10);
 
 async function main() {
   const cfg = JSON.parse(await fs.readFile(path.join(ROOT, 'sources.json'), 'utf8'));
-  const sources = cfg.sources.filter((s) => s.enabled !== false);
+  const only = process.env.ONLY ? new Set(process.env.ONLY.split(',')) : null; // til lokal testing
+  const sources = cfg.sources.filter((s) => s.enabled !== false && (!only || only.has(s.id)));
   const existing = await loadExisting();
   const statusFile = await loadStatus();
   log(`Har ${existing.size} innlegg fra før. Kilder: ${sources.map((s) => s.id).join(', ')}`);
@@ -733,6 +792,7 @@ async function main() {
       else if (src.type === 'invision') result = await fetchInvision(src, all);
       else if (src.type === 'entur') result = await fetchEntur(src, all);
       else if (src.type === 'cisa-kev') result = await fetchCisaKev(src);
+      else if (src.type === 'politiloggen') result = await fetchPolitiloggen(src, all);
       else throw new Error(`Ukjent kildetype ${src.type}`);
 
       let added = 0;
@@ -784,13 +844,19 @@ async function main() {
   }
   statusFile.generated = iso();
   await fs.writeFile(path.join(DATA_DIR, 'status.json'), JSON.stringify(statusFile, null, 1));
+  // Publiseringsrate per kilde (innlegg siste 7 dager) – brukes av appen til å løfte sjeldne kilder.
+  const weekAgo = new Date(now - 7 * 86400e3);
+  const perWeek = {};
+  for (const it of all.values()) {
+    if (new Date(it.time) >= weekAgo) perWeek[it.source] = (perWeek[it.source] || 0) + 1;
+  }
   const index = {
     generated: iso(),
     total: days.reduce((n, d) => n + d.count, 0),
     days,
     sources: sources.map((s) => {
       const st = statusFile.sources[s.id] || {};
-      return { id: s.id, name: s.name, short: s.short || s.name, group: s.group, type: s.type, ok: !!st.ok, lastOk: st.lastOk, error: st.error, warn: st.warn, count: st.count || 0 };
+      return { id: s.id, name: s.name, short: s.short || s.name, group: s.group, type: s.type, ok: !!st.ok, lastOk: st.lastOk, error: st.error, warn: st.warn, count: st.count || 0, perWeek: perWeek[s.id] || 0 };
     }),
   };
   await fs.writeFile(path.join(DATA_DIR, 'index.json'), JSON.stringify(index));

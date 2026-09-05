@@ -2,8 +2,8 @@
    - Selve siden (navigasjon): nett først med kort tidsavbrudd, ellers cache, så nye versjoner vises straks.
    - Øvrige appfiler: cache først, oppdateres i bakgrunnen (alltid forbi HTTP-cachen).
    - Data (data/…): nett først med tidsavbrudd, ellers cache. */
-const VERSION = 'bedeem-v4';
-const SHELL = ['./', 'index.html', 'styles.css?v=4', 'app.js?v=4', 'sources.json', 'books.json', 'books-ledelse.json', 'manifest.webmanifest', 'icon.svg'];
+const VERSION = 'bedeem-v5';
+const SHELL = ['./', 'index.html', 'styles.css?v=5', 'app.js?v=5', 'sources.json', 'books.json', 'books-ledelse.json', 'manifest.webmanifest', 'icon.svg'];
 const NET_TIMEOUT = 12000;
 const NAV_TIMEOUT = 4000;
 

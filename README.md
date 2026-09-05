@@ -44,6 +44,18 @@ Kilder som ikke kan hentes automatisk: forumet på freak.no (Cloudflare-sperre
 mot roboter) og Citrix' sikkerhetsbulletiner (siden bygges med JavaScript og har
 ingen feed).
 
+## Vekting av sjeldne kilder
+
+Strømmen er ikke strengt kronologisk. Innhentingen teller hvor mange innlegg hver
+kilde har publisert siste sju dager (`perWeek` i `data/index.json`), og appen
+løfter innlegg fra kilder som publiserer sjeldnere enn 100 i uka, som om de var
+publisert senere: 4 timer for hver halvering av raten, maks 48 timer. En kilde med
+ti innlegg i uka løftes rundt 13 timer, én i uka rundt 27 timer, VG med flere
+hundre ikke i det hele tatt. Justeres med konstantene øverst i `app.js`. Hjerte (♥) på en kilde gir 50 % mer løft pluss 3 timer, så en sjelden kilde
+uten hjerte likevel går foran en hyppig kilde med hjerte. Slideren i
+Kilder-panelet setter grensen for «veldig sjelden» (fra færre enn 1 til flere enn
+100 per uke); innlegg fra slike kilder får rød ramme.
+
 ## Bok-påminnelser
 
 `books.json` (og filene den peker til i `include`, f.eks. `books-ledelse.json`)

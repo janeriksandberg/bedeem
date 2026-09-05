@@ -8,6 +8,13 @@
   const BOOK_FILES = ['books.json'];   // filer med bok-påminnelser (books.json kan peke videre med "include")
   const DEFAULT_BOOK_MAX = 10;         // maks bokkort per 100 innlegg
   const DEFAULT_BOOK_MIN = 3;          // minst bokkort per 100 innlegg
+  // Vekting av sjeldne kilder: en kilde med færre innlegg per uke enn FREQUENT_PER_WEEK
+  // får innleggene sine løftet i strømmen, som om de var publisert opptil MAX_BOOST_H timer senere.
+  const FREQUENT_PER_WEEK = 100;
+  const BOOST_PER_HALVING_H = 4;       // timer løft for hver halvering av publiseringsraten (10/uke ≈ 13 t, 1/uke ≈ 27 t)
+  const MAX_BOOST_H = 48;
+  const RARE_STEPS = [0.99, 1, 2, 3, 5, 7, 10, 15, 20, 30, 50, 70, 100, Infinity]; // slider: «veldig sjelden» = færre enn X per uke
+  const DEFAULT_RARE_STEP = 4;         // 5 per uke
   const BATCH = 20;
   const SETTINGS_KEY = 'bedeem:settings';
   const VISIT_KEY = 'bedeem:lastVisit';
@@ -30,6 +37,8 @@
     if (!Array.isArray(s.hidden)) s.hidden = [];
     if (!(Number.isFinite(s.bookMax) && s.bookMax >= 0)) s.bookMax = DEFAULT_BOOK_MAX;
     if (!(Number.isFinite(s.bookMin) && s.bookMin >= 0)) s.bookMin = DEFAULT_BOOK_MIN;
+    if (!Array.isArray(s.hearts)) s.hearts = [];
+    if (!(Number.isInteger(s.rareStep) && s.rareStep >= 0 && s.rareStep < RARE_STEPS.length)) s.rareStep = DEFAULT_RARE_STEP;
     return s;
   }
   function saveSettings() {
@@ -87,6 +96,42 @@
     return `${Math.round(h / 24)} d siden`;
   }
   const sourceById = (id) => state.sources.find((s) => s.id === id) || { id, name: id, short: id };
+
+  // ---------- Vekting: sjeldne kilder løftes, hjerte gir ekstra ----------
+  const rateFallback = {}; // innlegg/uke beregnet fra bufferen når index.json mangler tallet
+  function sourceRate(id) {
+    const s = sourceById(id);
+    if (Number.isFinite(s.perWeek)) return s.perWeek;
+    return rateFallback[id] ?? 0;
+  }
+  const rareLimit = () => RARE_STEPS[settings.rareStep];
+  const isRareSource = (id) => sourceRate(id) < rareLimit();
+  function boostHours(it) {
+    const rate = Math.max(0.5, sourceRate(it.source));
+    let boost = rate >= FREQUENT_PER_WEEK ? 0 : BOOST_PER_HALVING_H * Math.log2(FREQUENT_PER_WEEK / rate);
+    if (settings.hearts.includes(it.source)) boost = boost * 1.5 + 3; // hjerte: mer løft, men sjeldne uten hjerte slår hyppige med hjerte
+    return Math.min(MAX_BOOST_H, boost);
+  }
+  function effectiveTime(it) {
+    return new Date(it.time).getTime() + boostHours(it) * 3600e3;
+  }
+  function applyOrder() {
+    for (const it of state.items) it._eff = effectiveTime(it);
+    state.items.sort((a, b) => b._eff - a._eff);
+  }
+  function computeRateFallback(items) {
+    const newest = items.reduce((m, it) => Math.max(m, new Date(it.time).getTime()), 0);
+    const from = newest - 7 * 86400e3;
+    const counts = {};
+    for (const it of items) if (new Date(it.time).getTime() >= from) counts[it.source] = (counts[it.source] || 0) + 1;
+    for (const k of Object.keys(rateFallback)) delete rateFallback[k];
+    Object.assign(rateFallback, counts);
+  }
+  function fmtRate(r) {
+    if (r >= 10) return `${Math.round(r)}/uke`;
+    if (r >= 1) return `${Math.round(r * 10) / 10}/uke`;
+    return r > 0 ? '<1/uke' : '0/uke';
+  }
 
   // ---------- Skriftstørrelse ----------
   function applyFont() {
@@ -233,7 +278,7 @@
     // Slå sammen status fra index inn i kildelisten.
     for (const s of index.sources || []) {
       const t = state.sources.find((x) => x.id === s.id);
-      if (t) Object.assign(t, { ok: s.ok, lastOk: s.lastOk, error: s.error, warn: s.warn, count: s.count });
+      if (t) Object.assign(t, { ok: s.ok, lastOk: s.lastOk, error: s.error, warn: s.warn, count: s.count, perWeek: s.perWeek });
       else state.sources.push(s);
     }
 
@@ -260,9 +305,11 @@
     const seen = new Set();
     const uniq = items.filter((it) => (seen.has(it.id) ? false : (seen.add(it.id), true)));
     uniq.sort((a, b) => (a.time < b.time ? 1 : a.time > b.time ? -1 : 0));
+    computeRateFallback(uniq);
     const visible = uniq.filter((it) => !hidden.has(it.source));
     const limit = want + (state.extraDays ? Infinity : 0);
     state.items = Number.isFinite(limit) ? visible.slice(0, limit) : visible;
+    applyOrder();
     state.loadedDays = loadedDays;
     state.loading = false;
 
@@ -331,11 +378,14 @@
     if (it._book) return renderBookCard(it);
     const src = sourceById(it.source);
     const art = document.createElement('article');
-    art.className = 'post' + (lastVisit && new Date(it.time).getTime() > lastVisit ? ' unread' : '');
+    const rare = isRareSource(it.source);
+    art.className = 'post' + (lastVisit && new Date(it.time).getTime() > lastVisit ? ' unread' : '') + (rare ? ' rare' : '');
     art.dataset.id = it.id;
 
     const meta = [];
     meta.push(`<span class="tag${it.severity ? ' sev-' + esc(it.severity) : ''}">${esc(src.short || src.name)}</span>`);
+    if (settings.hearts.includes(it.source)) meta.push('<span class="heart-mark" title="Prioritert kilde">♥</span>');
+    if (rare) meta.push('<span class="rare-mark" title="Kilde som publiserer sjelden">sjelden</span>');
     meta.push(`<time datetime="${esc(it.time)}" title="${new Date(it.time).toLocaleString('nb-NO')}">${fmtTime(it.time)}</time>`);
     if (it.author) meta.push(`<span>${esc(it.author)}</span>`);
     if (it.category && src.type !== 'reddit') meta.push(`<span>${esc(it.category)}</span>`);
@@ -463,15 +513,23 @@
       if (!groups.has(g)) groups.set(g, []);
       groups.get(g).push(s);
     }
+    const hearts = new Set(settings.hearts);
     const sections = [...groups].map(([g, list]) => {
       const rows = list.map((s) => {
         const dot = s.ok === false ? 'err' : s.warn ? 'warn' : s.ok ? 'ok' : '';
         let info;
-        if (s.type === 'book') info = `${esc(s.authors || '')} · ${s.count} kort`;
-        else info = s.error ? `Feil: ${s.error}` : s.warn ? s.warn : s.lastOk ? `Hentet ${fmtRel(s.lastOk)}${s.count ? ` · ${s.count} innlegg` : ''}` : 'Ikke hentet ennå';
-        return `<li>
+        const isBook = s.type === 'book';
+        if (isBook) info = `${s.authors || ''} · ${s.count} kort`;
+        else {
+          const rate = sourceRate(s.id);
+          const rateTxt = `${fmtRate(rate)}${isRareSource(s.id) ? ' · sjelden' : ''}`;
+          info = s.error ? `Feil: ${s.error}` : s.warn ? `${rateTxt} · ${s.warn}` : s.lastOk ? `${rateTxt} · hentet ${fmtRel(s.lastOk)}` : `${rateTxt} · ikke hentet ennå`;
+        }
+        const heart = isBook ? '' : `<button type="button" class="heart${hearts.has(s.id) ? ' on' : ''}" data-heart="${esc(s.id)}" aria-pressed="${hearts.has(s.id)}" title="Prioriter denne kilden" aria-label="Prioriter ${esc(s.name)}">${hearts.has(s.id) ? '♥' : '♡'}</button>`;
+        return `<li${!isBook && isRareSource(s.id) ? ' class="rare-row"' : ''}>
           <label><input type="checkbox" data-src="${esc(s.id)}" ${hidden.has(s.id) ? '' : 'checked'}>
             <span><span class="tag">${esc(s.short || s.name)}</span> ${esc(s.name)}<br><span class="meta">${esc(info)}</span></span></label>
+          ${heart}
           <span class="dot ${dot}" title="${esc(info)}"></span>
         </li>`;
       });
@@ -482,6 +540,8 @@
         </div>` : '';
       return `<h3>${esc(g)}</h3>${extra}<ul>${rows.join('')}</ul>`;
     });
+    const rl = rareLimit();
+    const rareLabel = settings.rareStep === 0 ? 'færre enn 1' : rl === Infinity ? 'flere enn 100' : `færre enn ${rl}`;
     panelEl.innerHTML = `
       <div class="panel-inner">
       <div class="panel-head">
@@ -492,6 +552,12 @@
           <button type="button" class="btn" id="selReset" title="Tilbake til valgene før du trykket alle/ingen" aria-label="Tilbake til forrige valg" ${hiddenSnapshot ? '' : 'disabled'}>↺</button>
           <button type="button" class="btn" id="panelClose" title="Lukk" aria-label="Lukk kilder">✕</button>
         </div>
+      </div>
+      <div class="rarebox">
+        <label for="rareSlider">Veldig sjelden kilde: <b id="rareLabel">${rareLabel}</b> innlegg per uke</label>
+        <input type="range" id="rareSlider" min="0" max="${RARE_STEPS.length - 1}" step="1" value="${settings.rareStep}">
+        <div class="small">Innlegg fra kilder som publiserer sjeldnere enn dette får rød ramme. Alle kilder som publiserer
+        sjeldnere enn ${FREQUENT_PER_WEEK} innlegg i uka løftes i strømmen, mest de sjeldneste. ♥ gir ekstra løft, men sjeldne kilder uten hjerte går foran hyppige med hjerte.</div>
       </div>
       ${sections.join('')}
       <div class="small">Valgene lagres på denne enheten (enhets-id ${esc(settings.device)}). Ingen pålogging.
@@ -506,6 +572,30 @@
       saveSettings();
       loadFeed({ keepScroll: true });
     }));
+    panelEl.querySelectorAll('button[data-heart]').forEach((b) => b.addEventListener('click', () => {
+      const id = b.dataset.heart;
+      settings.hearts = settings.hearts.includes(id) ? settings.hearts.filter((x) => x !== id) : [...settings.hearts, id];
+      saveSettings();
+      const scroll = panelEl.scrollTop;
+      renderPanel();
+      panelEl.scrollTop = scroll;
+      applyOrder();
+      renderReset();
+    }));
+    const slider = $('#rareSlider');
+    slider.addEventListener('input', () => {
+      settings.rareStep = Number(slider.value);
+      const v = rareLimit();
+      $('#rareLabel').textContent = settings.rareStep === 0 ? 'færre enn 1' : v === Infinity ? 'flere enn 100' : `færre enn ${v}`;
+    });
+    slider.addEventListener('change', () => {
+      settings.rareStep = Number(slider.value);
+      saveSettings();
+      const scroll = panelEl.scrollTop;
+      renderPanel();
+      panelEl.scrollTop = scroll;
+      renderReset();
+    });
     const snap = () => { if (!hiddenSnapshot) hiddenSnapshot = settings.hidden.slice(); };
     $('#selNone').addEventListener('click', () => { snap(); setHidden(state.sources.map((s) => s.id)); });
     $('#selAll').addEventListener('click', () => { snap(); setHidden([]); });

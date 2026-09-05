@@ -1,5 +1,5 @@
 {
-  "_help": "Legg til en ny kilde ved å legge inn et nytt objekt i listen. Typer: rss (RSS/Atom-feed), reddit (subreddit; valgfritt listing=new|hot|top og t=day|week), invision (Invision Community-forum, f.eks. Kvinneguiden), entur (avvik for tog via Entur), cisa-kev (CISA Known Exploited Vulnerabilities, JSON). Feltet 'short' vises som merkelapp i appen, 'group' brukes til gruppering i Kilder-panelet.",
+  "_help": "Legg til en ny kilde ved å legge inn et nytt objekt i listen. Typer: rss (RSS/Atom-feed), reddit (subreddit; valgfritt listing=new|hot|top og t=day|week), invision (Invision Community-forum, f.eks. Kvinneguiden), entur (avvik for tog via Entur), cisa-kev (CISA Known Exploited Vulnerabilities, JSON), politiloggen (districts=[...], valgfritt municipalities=[...]). Feltet 'short' vises som merkelapp i appen, 'group' brukes til gruppering i Kilder-panelet.",
   "sources": [
     {
       "id": "vy-sande",
@@ -18,6 +18,12 @@
     { "id": "filternyheter", "name": "Filter Nyheter", "short": "Filter", "group": "Norge", "type": "rss", "url": "https://filternyheter.no/feed/" },
     { "id": "document", "name": "Document.no", "short": "Doc", "group": "Norge", "type": "rss", "url": "https://www.document.no/feed/" },
     { "id": "kvinneguiden", "name": "Kvinneguiden forum", "short": "KG", "group": "Norge", "type": "invision", "url": "https://forum.kvinneguiden.no/discover/" },
+    { "id": "itromso", "name": "iTromsø", "short": "iTromsø", "group": "Norge", "type": "rss", "url": "https://www.itromso.no/rss" },
+    { "id": "sandeavis", "name": "Sande Avis", "short": "Sande Avis", "group": "Norge", "type": "rss", "url": "https://www.sandeavis.no/service/rich-rss" },
+    { "id": "dt", "name": "Drammens Tidende", "short": "DT", "group": "Norge", "type": "rss", "url": "https://www.dt.no/service/rich-rss" },
+    { "id": "politi-oslo", "name": "Politiloggen · Oslo", "short": "Politi Oslo", "group": "Norge", "type": "politiloggen", "districts": ["Oslo"], "url": "https://www.politiet.no/politiloggen/" },
+    { "id": "politi-vestfold", "name": "Politiloggen · Vestfold", "short": "Politi Vestfold", "group": "Norge", "type": "politiloggen", "districts": ["SørØst"], "municipalities": ["Holmestrand", "Horten", "Tønsberg", "Færder", "Sandefjord", "Larvik"], "url": "https://www.politiet.no/politiloggen/" },
+    { "id": "politi-tromso", "name": "Politiloggen · Tromsø", "short": "Politi Tromsø", "group": "Norge", "type": "politiloggen", "districts": ["Troms"], "municipalities": ["Tromsø"], "url": "https://www.politiet.no/politiloggen/" },
 
     { "id": "r-norge", "name": "r/norge", "short": "r/norge", "group": "Reddit", "type": "reddit", "subreddit": "norge", "listing": "new" },
     { "id": "r-norske", "name": "r/norske", "short": "r/norske", "group": "Reddit", "type": "reddit", "subreddit": "norske", "listing": "new" },
