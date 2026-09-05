@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DATA_DIR = path.join(ROOT, 'data');
 const DAYS_DIR = path.join(DATA_DIR, 'days');
-const RETENTION_DAYS = Number(process.env.RETENTION_DAYS || 21);
+const RETENTION_DAYS = Number(process.env.RETENTION_DAYS || 60);
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36';
 
 // Grenser som holder datamengden nede (alt lastes ned til mobil).
@@ -88,6 +88,8 @@ export function htmlToText(html) {
   s = s.replace(/<(p|div|h[1-6]|blockquote|tr|table|pre|section|article)\b[^>]*>/gi, '\n');
   s = s.replace(/<[^>]+>/g, '');
   s = decodeEntities(s);
+  // Noen feeder (f.eks. SANS ISC) er dobbelt-escapet.
+  for (let i = 0; i < 2 && /&(#\d+|#x[0-9a-f]+|[a-z]+);/i.test(s); i++) s = decodeEntities(s);
   s = s.replace(/ /g, ' ');
   s = s.split('\n').map((l) => l.replace(/[ \t\r\f]+/g, ' ').trim()).join('\n');
   s = s.replace(/\n{3,}/g, '\n\n').trim();
@@ -135,7 +137,8 @@ function splitBlocks(xml, name) {
 }
 function parseDate(s) {
   if (!s) return null;
-  const d = new Date(s.trim());
+  let d = new Date(s.trim());
+  if (Number.isNaN(d.getTime())) d = new Date(s.trim().replace(/\sZ$/, ' GMT')); // f.eks. MSRC: "Fri, 04 Sep 2026 22:11:22 Z"
   return Number.isNaN(d.getTime()) ? null : d;
 }
 function iso(d) { return (d || now).toISOString(); }
@@ -173,7 +176,9 @@ async function fetchRss(src) {
       body: truncate(body, LIMITS.bodyChars),
     });
   }
-  return { items };
+  // Noen feeder (f.eks. MSRC) inneholder tusenvis av poster – behold bare de nyeste.
+  items.sort((a, b) => (a.time < b.time ? 1 : -1));
+  return { items: items.slice(0, src.maxItems || 200) };
 }
 
 // --- Reddit: liste via RSS, kommentarer via shreddit-HTML (med dybde).
@@ -299,7 +304,7 @@ async function fetchRedditThread(sub, t3) {
 
 async function fetchReddit(src, existing) {
   const listing = src.listing || 'new';
-  const xml = await redditGet(`https://www.reddit.com/r/${src.subreddit}/${listing}.rss?limit=100`);
+  const xml = await redditGet(`https://www.reddit.com/r/${src.subreddit}/${listing}.rss?limit=100${src.t ? '&t=' + encodeURIComponent(src.t) : ''}`);
   const items = [];
   for (const b of splitBlocks(xml, 'entry')) {
     const fullId = tagText(b, 'id'); // t3_xxxx
@@ -646,6 +651,34 @@ async function fetchEntur(src, existing) {
   }
   return { items: [...seen.values()] };
 }
+// --- CISA Known Exploited Vulnerabilities (JSON-katalog).
+async function fetchCisaKev(src) {
+  const { text, status } = await fetchText(src.url, { headers: { Accept: 'application/json' } });
+  if (status !== 200) throw new Error(`HTTP ${status}`);
+  const json = JSON.parse(text);
+  const vulns = (json.vulnerabilities || [])
+    .sort((a, b) => (a.dateAdded < b.dateAdded ? 1 : -1))
+    .slice(0, 150);
+  const items = vulns.map((v) => {
+    const parts = [];
+    if (v.shortDescription) parts.push(v.shortDescription);
+    if (v.requiredAction) parts.push('Tiltak: ' + v.requiredAction);
+    if (v.dueDate) parts.push('Frist (US federal): ' + v.dueDate);
+    if (v.knownRansomwareCampaignUse && v.knownRansomwareCampaignUse !== 'Unknown') parts.push('Brukt i løsepengevirus-kampanjer: ' + v.knownRansomwareCampaignUse);
+    if (v.notes) parts.push(v.notes.split(/\s*;\s*/).filter(Boolean).join('\n'));
+    return {
+      id: `${src.id}:${v.cveID}`,
+      source: src.id,
+      title: `${v.cveID} · ${v.vendorProject} ${v.product}: ${v.vulnerabilityName}`,
+      url: `https://nvd.nist.gov/vuln/detail/${encodeURIComponent(v.cveID)}`,
+      time: iso(parseDate(v.dateAdded + 'T12:00:00Z')),
+      category: v.vendorProject,
+      body: truncate(parts.join('\n\n'), LIMITS.bodyChars),
+    };
+  });
+  return { items };
+}
+
 function pick(arr) {
   if (!arr?.length) return '';
   return (arr.find((x) => /^(no|nb|nn)/i.test(x.language || '')) || arr[0]).value?.trim() || '';
@@ -699,6 +732,7 @@ async function main() {
       else if (src.type === 'reddit') result = await fetchReddit(src, all);
       else if (src.type === 'invision') result = await fetchInvision(src, all);
       else if (src.type === 'entur') result = await fetchEntur(src, all);
+      else if (src.type === 'cisa-kev') result = await fetchCisaKev(src);
       else throw new Error(`Ukjent kildetype ${src.type}`);
 
       let added = 0;
@@ -752,15 +786,15 @@ async function main() {
   await fs.writeFile(path.join(DATA_DIR, 'status.json'), JSON.stringify(statusFile, null, 1));
   const index = {
     generated: iso(),
-    total: all.size,
+    total: days.reduce((n, d) => n + d.count, 0),
     days,
     sources: sources.map((s) => {
       const st = statusFile.sources[s.id] || {};
-      return { id: s.id, name: s.name, short: s.short || s.name, type: s.type, ok: !!st.ok, lastOk: st.lastOk, error: st.error, warn: st.warn, count: st.count || 0 };
+      return { id: s.id, name: s.name, short: s.short || s.name, group: s.group, type: s.type, ok: !!st.ok, lastOk: st.lastOk, error: st.error, warn: st.warn, count: st.count || 0 };
     }),
   };
   await fs.writeFile(path.join(DATA_DIR, 'index.json'), JSON.stringify(index));
-  log(`Ferdig: ${all.size} innlegg fordelt på ${days.length} dager.`);
+  log(`Ferdig: ${index.total} innlegg fordelt på ${days.length} dager.`);
 }
 function stripUndefined(o) {
   const r = {};

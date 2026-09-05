@@ -1,0 +1,394 @@
+{
+  "_help": "Bok-påminnelser. Hvert kort skal stå seg alene: hva poenget er, hvorfor det virker og hvordan du bruker det i hverdagen. Appen fletter kortene inn tilfeldig mellom innleggene (maks 1 av 10, minst 1 av 30). Legg til en bok ved å legge til et objekt i 'books' med id, title, authors og cards.",
+  "books": [
+    {
+      "id": "getting-to-yes",
+      "title": "Getting to Yes",
+      "authors": "Roger Fisher, William Ury og Bruce Patton",
+      "cards": [
+        {
+          "title": "Forhandle om interesser, ikke posisjoner",
+          "body": "En posisjon er det du sier du vil ha («jeg må ha 10 %»). En interesse er grunnen bak («jeg trenger forutsigbarhet i økonomien»). Når to parter låser seg til posisjoner, blir forhandlingen en styrkeprøve der noen må tape ansikt. Interesser kan derimot ofte dekkes på flere måter.\n\nI hverdagen: Når du merker at du står fast, stopp og spør deg selv «hva er det jeg egentlig trenger her?» og «hva trenger de?». Si interessen din høyt, og spør etter deres."
+        },
+        {
+          "title": "Skill menneskene fra problemet",
+          "body": "Forhandlinger går skeis når saken og relasjonen blandes sammen: kritikk av et forslag føles som kritikk av personen, og folk begynner å forsvare seg i stedet for å løse noe. Boken anbefaler å være myk mot menneskene og hard mot problemet.\n\nI hverdagen: Snakk om saken som noe dere ser på sammen, side om side, ikke som noe som står mellom dere. «Vi har et problem med leveringen» i stedet for «du leverte for sent»."
+        },
+        {
+          "title": "Spør «hvorfor?» og «hvorfor ikke?»",
+          "body": "For å finne den andres interesser, sett deg i deres sted og spør hvorfor de tar den posisjonen de gjør. Spør også hvorfor de ikke har gått med på det du foreslår: hvilke interesser hindrer dem? Ofte er det hensyn du ikke har tenkt på, som hvordan de skal forsvare avtalen for sjefen eller familien.\n\nI hverdagen: Still spørsmål som «hva er det som gjør det vanskelig å si ja til dette?» og lytt på svaret uten å argumentere."
+        },
+        {
+          "title": "De sterkeste interessene er grunnleggende behov",
+          "body": "Bak nesten alle posisjoner ligger de samme menneskelige behovene: sikkerhet, økonomisk trygghet, tilhørighet, anerkjennelse og kontroll over eget liv. Vi overser dem ofte fordi vi tror forhandlingen handler om penger eller vilkår.\n\nI hverdagen: Når noen virker urimelig sta, spør deg selv hvilket grunnleggende behov som er truet. En avtale som dekker det behovet på en annen måte kan løse opp det hele."
+        },
+        {
+          "title": "Skill idémyldring fra beslutning",
+          "body": "Vi finner sjelden gode løsninger fordi vi dømmer ideer i samme øyeblikk som vi får dem, leter etter det ene riktige svaret, og tror kaken har fast størrelse. Boken anbefaler egne økter der alt er lov å foreslå, og der ingen forplikter seg til noe.\n\nI hverdagen: Si «la oss bare kaste ut muligheter i ti minutter, uten å vurdere dem». Utvid kaken før dere deler den: ulike interesser, ulik tidshorisont og ulik risikovilje gir bytter som gjør begge bedre stilt."
+        },
+        {
+          "title": "Insister på objektive kriterier",
+          "body": "Når interessene står direkte mot hverandre, avgjør det som regel hvem som er mest stri. Alternativet er å bli enige om en rettferdig målestokk først: markedspris, presedens, ekspertvurdering, lov, tradisjon eller gjensidighet. Da forhandler dere om prinsipp, ikke om vilje.\n\nI hverdagen: Spør «hva bygger du det tallet på?» og «hvilken standard ville du selv synes var rettferdig hvis rollene var byttet?». Vær åpen for gode argumenter, men gi aldri etter for press alene."
+        },
+        {
+          "title": "Kjenn din BATNA",
+          "body": "BATNA er ditt beste alternativ til en forhandlet avtale: det du faktisk gjør hvis dere ikke blir enige. Det er dette, ikke ønsketenkning eller en fastsatt nedre grense, som avgjør hvor mye makt du har. En dårlig avtale er bare dårlig sammenlignet med ditt beste alternativ.\n\nI hverdagen: Før en viktig forhandling, skriv ned konkret hva du gjør hvis det ikke blir enighet, og gjør det alternativet bedre. Vurder også hva den andre partens alternativ er."
+        },
+        {
+          "title": "Forhandlings-jujitsu: ikke skyv tilbake",
+          "body": "Når den andre angriper eller låser seg, er impulsen å angripe tilbake eller forsvare seg. Da havner du i posisjonskrig. I stedet: la angrepet gå forbi. Behandle deres posisjon som et mulig alternativ og spør etter interessene bak. Inviter til kritikk av ditt eget forslag. Omformuler angrep på deg til angrep på problemet.\n\nI hverdagen: To verktøy virker nesten alltid: still spørsmål i stedet for å komme med påstander, og vær stille etter at du har spurt."
+        },
+        {
+          "title": "Én-tekst-metoden",
+          "body": "Når partene er låst, kan en tredjepart (eller du selv) skrive ett forslag som ikke krever forpliktelse, og bare be om kritikk: «Hva er galt med dette for din del?». Så justeres teksten, runde etter runde, til den ikke kan bli bedre for begge. Først da må partene si ja eller nei.\n\nI hverdagen: Lag et utkast som vurderer begge parters interesser, og be om innspill i stedet for godkjenning. Det fjerner behovet for å forsvare posisjoner."
+        },
+        {
+          "title": "Håndter skitne triks ved å forhandle om spillereglene",
+          "body": "Løgn, tvilsom autoritet, personangrep, «snill og slem»-taktikk, kunstige frister og stadig eskalerende krav er manipulasjon. Å finne seg i det belønner det; å svare med samme mynt gjør alt verre. Boken anbefaler å gjenkjenne taktikken, si den høyt på en nøytral måte og forhandle om hvordan dere skal forhandle.\n\nI hverdagen: «Jeg legger merke til at fristen flyttes hver gang vi nærmer oss. Kan vi bli enige om hvordan vi håndterer tidsplanen?»"
+        },
+        {
+          "title": "Anerkjenn følelser, hos deg selv og andre",
+          "body": "I en forhandling er følelsene ofte viktigere enn ordene. Ignorerte følelser kommer tilbake som stahet og angrep. Legg merke til hva du selv føler, gjett hva de andre føler, og sett ord på det uten å dømme. La folk lufte frustrasjon uten å reagere på utbrudd.\n\nI hverdagen: En enkel setning som «jeg skjønner at dette er frustrerende» kan senke temperaturen mer enn ti gode argumenter. Små symbolske gester, som en unnskyldning, koster lite og virker sterkt."
+        },
+        {
+          "title": "Lytt aktivt og snakk om deg selv, ikke om dem",
+          "body": "Lytting er den billigste innrømmelsen du kan gi. Oppsummer det du hører med egne ord, og be dem korrigere. Når du snakker, beskriv problemet ut fra hvordan det påvirker deg («jeg føler meg oversett») heller enn å karakterisere dem («du hører aldri etter»). Det første er vanskelig å motsi, det andre utløser forsvar.\n\nI hverdagen: Snakk med et formål. Før du sier noe viktig, vit hva du vil oppnå med akkurat den setningen."
+        },
+        {
+          "title": "Gjør det lett for dem å si ja",
+          "body": "Folk sier ikke ja til forslag som får dem til å se svake ut for sine egne. Tenk gjennom hvordan avtalen ser ut fra deres side: kan den forsvares for kolleger, sjef eller familie? Formuler forslag slik at de kan svare med ett enkelt «ja», og la dem gjerne få æren for gode ideer.\n\nI hverdagen: Spør deg selv hvilken avtale du ville sagt ja til i deres sted, og hvilken tekst de kan sende videre uten å måtte skamme seg."
+        },
+        {
+          "title": "Bygg relasjonen før du trenger den",
+          "body": "Jo bedre du kjenner den andre parten som menneske, jo lettere blir det å skille sak fra person når det brenner. Prat før møtet starter, kom tidlig, spis lunsj sammen. Da er «de» ikke en abstrakt motpart, men en person du har et forhold til.\n\nI hverdagen: Investér litt i menneskene rundt deg jevnlig, uten agenda. Det er kapital du får bruk for den dagen dere er uenige."
+        }
+      ]
+    },
+    {
+      "id": "win-friends",
+      "title": "How to Win Friends and Influence People",
+      "authors": "Dale Carnegie",
+      "cards": [
+        {
+          "title": "Ikke kritiser, fordøm eller klag",
+          "body": "Kritikk gjør folk defensive og får dem til å rettferdiggjøre seg selv. Den såret stoltheten, skader relasjonen og endrer sjelden atferd. Selv de som åpenbart har gjort noe galt, ser seg selv som fornuftige. Å forstå hvorfor de handlet som de gjorde er mer nyttig enn å dømme.\n\nI hverdagen: Når du får lyst til å påpeke en feil, spør deg selv om det endrer noe, eller bare gir deg et lite øyeblikk av overtak."
+        },
+        {
+          "title": "Gi ærlig og oppriktig anerkjennelse",
+          "body": "Menneskets dypeste trang er ønsket om å føle seg betydningsfull. Smiger er tomt og gjennomskues; anerkjennelse er å legge merke til noe konkret og godt og si det. Folk husker en oppriktig anerkjennelse i årevis.\n\nI hverdagen: Se etter én ting å sette pris på hos hver du møter i dag, og si det spesifikt: ikke «bra jobba», men hva som var bra og hvorfor det betydde noe."
+        },
+        {
+          "title": "Vekk et oppriktig ønske hos den andre",
+          "body": "Den eneste måten å påvirke noen på er å snakke om hva de vil, og vise dem hvordan de får det. Vi tenker i «jeg vil»; den andre tenker det samme om seg selv. Spør før du ber om noe: «Hvordan kan jeg få denne personen til å ønske dette selv?»\n\nI hverdagen: Skriv om forespørsler slik at den andres fordel kommer først. «Hvis vi tar dette nå, slipper du purringene neste uke» slår «jeg trenger dette nå»."
+        },
+        {
+          "title": "Bli oppriktig interessert i andre mennesker",
+          "body": "Du får flere venner på to måneder ved å interessere deg for andre enn på to år ved å prøve å få andre interessert i deg. Interesse må være ekte; folk merker forskjellen på et spørsmål som er nysgjerrig og et som venter på å bli ferdig.\n\nI hverdagen: Husk detaljer folk har fortalt deg og spør opp igjen: prosjektet, barnet, reisen. Det viser at de finnes i hodet ditt også når de ikke er i rommet."
+        },
+        {
+          "title": "Smil",
+          "body": "Et ekte smil sier «jeg liker deg, du gjør meg glad, jeg er glad for å se deg» før du har sagt et ord. Det virker også på deg selv: handlingen kommer før følelsen, og du blir mer vennlig innstilt av å oppføre deg vennlig. Et smil høres til og med gjennom telefonen.\n\nI hverdagen: Møt folk med et smil når de kommer inn i rommet, også kolleger du ser hver dag, og legg merke til hva som skjer med tonen."
+        },
+        {
+          "title": "Husk navn",
+          "body": "En persons navn er for dem det viktigste og fineste ordet i noe språk. Å huske og bruke navnet er en stille kompliment; å glemme eller stave det feil er en liten fornærmelse. Det handler ikke om talent, men om innsats: gjenta, spør om stavemåte, knytt det til noe.\n\nI hverdagen: Bruk navnet naturlig i samtalen rett etter at du har fått det, og skriv det ned etterpå hvis du kommer til å treffe personen igjen."
+        },
+        {
+          "title": "Vær en god lytter, og få andre til å snakke om seg selv",
+          "body": "Den som lytter oppmerksomt oppfattes som den beste samtalepartneren, selv om vedkommende knapt sa noe. Folk er mer interessert i seg selv og sine problemer enn i deg. Å avbryte, eller vente på din tur til å snakke, merkes med en gang.\n\nI hverdagen: Still oppfølgingsspørsmål. Når noen forteller noe, spør «hvordan var det?» eller «hva gjorde du da?» i stedet for å bytte til din egen historie."
+        },
+        {
+          "title": "Snakk om det den andre er interessert i",
+          "body": "Veien til noens hjerte går gjennom det de bryr seg mest om. Finn ut hva den andre brenner for, sett deg litt inn i det og la samtalen handle om det. Det gir energi til den andre og gjør deg til en person de liker å være sammen med.\n\nI hverdagen: Før en samtale med noen du vil nå fram til, finn ut hva som opptar dem akkurat nå, og begynn der."
+        },
+        {
+          "title": "Få den andre til å føle seg viktig, og gjør det oppriktig",
+          "body": "Alle du møter mener de er bedre enn deg på ett eller annet område. Finn det området og anerkjenn det. «Gjør mot andre det du vil at andre skal gjøre mot deg» gjelder også her: du vil bli lagt merke til og verdsatt, og det vil de også.\n\nI hverdagen: Små fraser koster ingenting: «beklager at jeg forstyrrer», «takk for at du tok deg tid», «det var godt tenkt». Sagt oppriktig gjør de en hel dag lettere."
+        },
+        {
+          "title": "Den eneste måten å vinne en diskusjon på er å unngå den",
+          "body": "Ni av ti diskusjoner ender med at begge er mer overbevist om sitt eget syn enn før. Vinner du, har du såret den andres stolthet, og de vil aldri egentlig gi deg rett. Uenighet kan være nyttig hvis den utforskes rolig, men en krangel har ingen vinnere.\n\nI hverdagen: Når du kjenner trangen til å motsi, ta imot uenigheten med «det er et poeng, la meg tenke på det» og let etter det du faktisk kan være enig i."
+        },
+        {
+          "title": "Vis respekt for den andres mening. Si aldri «du tar feil»",
+          "body": "Å fortelle noen at de tar feil er å angripe deres intelligens, dømmekraft og stolthet i én setning. Det får dem til å ville slå tilbake, ikke tenke om igjen. Innled i stedet med «jeg kan ta feil, det gjør jeg ofte, la oss se på fakta».\n\nI hverdagen: Bytt «det er feil» med «jeg ser det annerledes, kan du forklare hvordan du kom fram til det?». Da inviterer du til tenkning i stedet for forsvar."
+        },
+        {
+          "title": "Tar du feil, innrøm det raskt og tydelig",
+          "body": "Når du innrømmer en feil før den andre får sagt noe, tar du luften ut av kritikken. Den andre får da rollen som den storsinnede og vil ofte forsvare deg. Å krangle for noe du vet er galt, skader mer enn feilen selv.\n\nI hverdagen: Si det som det er, uten «men»: «Dette var min feil, jeg skulle sjekket. Slik retter jeg det.» Du fremstår tryggere, ikke svakere."
+        },
+        {
+          "title": "Begynn vennlig",
+          "body": "En dråpe honning fanger flere fluer enn en tønne galle. Kommer du inn med knyttet neve, møter du en knyttet neve tilbake. Vennlighet, ros og oppriktig anerkjennelse åpner folk; sinne og trusler lukker dem, uansett hvor rett du har.\n\nI hverdagen: Start klager og vanskelige samtaler med noe du er fornøyd med eller takknemlig for, og legg selve problemet fram som noe dere kan løse sammen."
+        },
+        {
+          "title": "Få den andre til å si «ja, ja» så tidlig som mulig",
+          "body": "Når noen først har sagt nei, forsvarer stoltheten det neiet. Begynn derfor med det dere er enige om, og bygg videre med spørsmål den andre må svare ja på. Hvert ja gjør neste ja lettere, og retningen er lagt før uenigheten dukker opp.\n\nI hverdagen: Legg fram felles mål først: «Vi er enige om at dette må være ferdig før fristen?» Deretter er det lettere å snakke om hvordan."
+        },
+        {
+          "title": "La den andre snakke mest",
+          "body": "Folk overtaler seg selv bedre enn du kan. La dem tømme seg, still spørsmål og hold tilbake lysten til å avbryte selv når du er uenig. De hører ikke deg uansett før de har fått sagt sitt. Venner vil heller snakke om egne resultater enn høre om dine.\n\nI hverdagen: Sikt på å snakke mindre enn halvparten av tiden i viktige samtaler. Tell gjerne mentalt."
+        },
+        {
+          "title": "La den andre føle at ideen er deres",
+          "body": "Ingen liker å bli solgt noe eller beordret til noe. Vi liker å handle etter egne ideer. Legg fram det du har tenkt som et frø, be om råd og la den andre bygge det ferdig. Da får ideen en eier som kjemper for den.\n\nI hverdagen: Spør «hva ville du gjort her?» og «hvordan ser du på dette?» framfor å presentere en ferdig løsning. Gi rikelig med ære når ideen blir deres."
+        },
+        {
+          "title": "Prøv oppriktig å se saken fra den andres side",
+          "body": "Den andre har som regel en grunn til å tenke og handle som de gjør. Finn den skjulte grunnen, så har du nøkkelen til både handlingen og personen. Spør deg selv: hvordan ville jeg følt og reagert i deres sko? Det sparer tid og irritasjon.\n\nI hverdagen: Før du svarer på en e-post som irriterer deg, skriv ned i én setning hva avsenderen egentlig ønsker seg. Svar på det."
+        },
+        {
+          "title": "Vis sympati med den andres ideer og ønsker",
+          "body": "Setningen «jeg klandrer deg ikke for at du føler det slik, jeg hadde følt det samme i din situasjon» demper nesten enhver konflikt. Og den er sann: hadde du vært den andre, med deres erfaringer, hadde du følt som dem. Folk hungrer etter sympati; gi dem den.\n\nI hverdagen: Anerkjenn følelsen før du svarer på saken: «Jeg skjønner godt at dette er irriterende.»"
+        },
+        {
+          "title": "Appellér til edlere motiver",
+          "body": "Folk har ofte to grunner til å gjøre noe: den ekte og den som lyder bra. Alle vil gjerne se seg selv som ærlige, rettferdige og rause. Appellerer du til den siden, gir du dem anledning til å leve opp til den. De fleste gjør det.\n\nI hverdagen: I stedet for å anta det verste, si «jeg vet du er en som holder ord» eller «du er jo opptatt av at dette skal være rettferdig». Så handler folk deretter."
+        },
+        {
+          "title": "Dramatiser ideene dine",
+          "body": "Sannhet er ikke nok; den må gjøres levende, interessant og synlig. Film, reklame og gode ledere viser i stedet for å fortelle. Et konkret eksempel, en demonstrasjon eller en historie fester seg der tall og påstander glir forbi.\n\nI hverdagen: Vil du overbevise om noe, vis det: legg fram den faktiske kunden, tegn det på tavla, fortell den ene historien som gjør poenget ditt umulig å glemme."
+        },
+        {
+          "title": "Kast ut en utfordring",
+          "body": "Når ingenting annet virker, appeller til konkurranseinstinktet og ønsket om å utmerke seg. Folk som får en verdig utfordring, jobber for spillet, for sjansen til å vise hva de kan, ikke bare for lønn. Arbeid blir spennende når det er noe å strekke seg etter.\n\nI hverdagen: Bytt «du må bli ferdig» med «tror du det er mulig å klare dette før fredag?». Gjør målet synlig og la resultatet telle."
+        },
+        {
+          "title": "Begynn med ros og oppriktig anerkjennelse",
+          "body": "En frisør legger skum på før han barberer. Kritikk går lettere inn etter at noen har hørt hva de gjør bra, fordi de ikke trenger å forsvare hele sin egenverdi. Rosen må være ekte og konkret, ellers virker den som forspill til et angrep.\n\nI hverdagen: Når du skal ta opp noe negativt, start med noe du faktisk setter pris på, og gjør det uten å bruke ordet «men» rett etter."
+        },
+        {
+          "title": "Påpek feil indirekte",
+          "body": "Direkte kritikk, selv etter ros, kan oppleves som et bakholdsangrep, spesielt når den innledes med «men». Sensitive mennesker tar lettere til seg et hint, en handling eller et eksempel enn en påpekning. Bytt «men» med «og»: «Karakterene er bedre, og hvis du jobber like hardt med algebra vil de stige der også.»\n\nI hverdagen: Vis den ønskede atferden selv, eller still et spørsmål som lar den andre oppdage feilen."
+        },
+        {
+          "title": "Snakk om dine egne feil før du kritiserer andre",
+          "body": "Det er langt lettere å ta imot kritikk fra en som først innrømmer at de selv er langt fra perfekt. «Jeg gjorde samme feilen da jeg var ny» tar bort skammen og gjør det til noe alle må gjennom. Ydmykhet åpner ører.\n\nI hverdagen: Innled tilbakemeldinger med en egen erfaring: hva du slet med, og hva som hjalp deg."
+        },
+        {
+          "title": "Still spørsmål i stedet for å gi ordrer",
+          "body": "«Kan dette gjøres på en annen måte?» virker bedre enn «gjør det slik». Spørsmål bevarer stoltheten, gir den andre eierskap og oppmuntrer til kreativitet. Folk følger lettere en beslutning de har vært med på å ta, selv når resultatet er det samme.\n\nI hverdagen: Formuler instrukser som spørsmål: «Tror du vi kunne rekke dette til onsdag?» «Hva ville du foreslå her?»"
+        },
+        {
+          "title": "La den andre redde ansikt",
+          "body": "Vi tråkker på andres følelser, kritiserer foran andre og glemmer hvor sårende det er. Noen minutters omtanke, et par hensynsfulle ord og en ekte forståelse for den andres synspunkt kan spare et menneske for stor smerte. Ingen har rett til å knuse noens selvfølelse.\n\nI hverdagen: Gi aldri kritikk foran andre. Når noen må gå eller mislykkes, la dem beholde verdigheten: fremhev det de gjorde godt."
+        },
+        {
+          "title": "Ros den minste forbedring, og ros hver forbedring",
+          "body": "Ros virker som sollys på et menneskes evner: de vokser når de får det, og visner uten. Konkret, oppriktig anerkjennelse av små framskritt får folk til å fortsette; kritikk av det som fortsatt mangler får dem til å gi opp. Vær varm i anerkjennelsen og raus med rosen.\n\nI hverdagen: Legg merke til framgang, ikke bare resultater. «Du har blitt mye tryggere i presentasjonene» kan være avgjørende for noen."
+        },
+        {
+          "title": "Gi den andre et godt rykte å leve opp til",
+          "body": "Behandler du folk som om de allerede har egenskapen du ønsker, strekker de seg for å leve opp til den. Kall noen pålitelig, og de vil ikke skuffe deg. Nevn at en avdeling har et rykte for kvalitet, og den beskytter det. Rykte er noe man ikke vil miste.\n\nI hverdagen: Beskriv den beste versjonen av personen som fakta: «Du er jo den som alltid følger opp», og se hva som skjer."
+        },
+        {
+          "title": "Oppmuntre, og gjør feilen lett å rette",
+          "body": "Sier du at noe er vanskelig og at noen mangler talent, dreper du motivasjonen. Sier du at feilen er liten, at de har anlegg for dette og at det bare trengs litt øving, tror de på deg og prøver. Folk trenger å tro at de kan klare det.\n\nI hverdagen: Når noen har gjort en feil, vis at det er lett å fikse, og pek på det de allerede gjør riktig."
+        },
+        {
+          "title": "Få den andre til å bli glad for å gjøre det du foreslår",
+          "body": "Når du vil endre atferd: vær ærlig og lov ingenting du ikke kan holde, tenk på hva den andre egentlig vil, finn fordelene for dem, knytt fordelene til det du ønsker, og formuler forespørselen slik at den andre ser at de får noe ut av det.\n\nI hverdagen: Før du ber noen om noe, fullfør setningen «det som er bra for deg med dette er ...». Kommer du ikke på noe, må du kanskje tenke om igjen."
+        }
+      ]
+    },
+    {
+      "id": "48-laws",
+      "title": "The 48 Laws of Power",
+      "authors": "Robert Greene (konsis utgave)",
+      "cards": [
+        {
+          "title": "Lov 1: Overstrål aldri sjefen",
+          "body": "Få de over deg til å føle seg trygge og overlegne. Vis dine talenter, men aldri på en måte som får sjefen til å virke mindre. Folk med makt frykter å bli forbigått mer enn de ønsker dyktige folk rundt seg.\n\nI hverdagen: La sjefen få æren i plenum, gi råd på tomannshånd, og pass på at dine seire også blir sjefens seire."
+        },
+        {
+          "title": "Lov 2: Stol ikke for mye på venner, lær å bruke fiender",
+          "body": "Venner blir lett misunnelige og tar ting for gitt; de forråder oftere, fordi de mener de fortjener mer. En tidligere fiende som får en sjanse har derimot noe å bevise og er ofte mer lojal. Greene mener du bør holde venner og forretninger fra hverandre.\n\nI hverdagen: Ansett og forfrem på ferdigheter og lojalitet, ikke vennskap. Og ikke avskriv folk du har vært i konflikt med; de kan bli dine mest verdifulle allierte."
+        },
+        {
+          "title": "Lov 3: Skjul hensiktene dine",
+          "body": "Folk som kjenner målet ditt kan forberede forsvar. Hold dem i mørket ved å snakke om noe annet, sende falske signaler eller pakke planen inn i noe ufarlig. Røyk, ikke stillhet: den som virker hemmelighetsfull vekker mistanke.\n\nI hverdagen: Ikke fortell om planer før de er klare til å settes ut i livet. Snakk gjerne om ufarlige interesser mens du jobber mot det som betyr noe."
+        },
+        {
+          "title": "Lov 4: Si alltid mindre enn nødvendig",
+          "body": "Jo mer du sier, jo mer vanlig virker du og jo mer kontroll gir du bort. Mektige mennesker imponerer ved å si lite; det tvetydige og korte virker dypere og gir andre rom til å lese inn mer enn du sa. Løst snakk avslører og skaper fiender.\n\nI hverdagen: I møter: si det ene poenget, så stopp. Svar kort på spørsmål. Fyll ikke stillhet med forklaringer; la de andre gjøre det."
+        },
+        {
+          "title": "Lov 5: Alt avhenger av ryktet ditt. Vokt det med livet",
+          "body": "Rykte er grunnmuren for makt. Med et solid rykte kan du påvirke og skremme uten å gjøre noe; er det først skadet, blir du sårbar og angrepet fra alle kanter. Lær å ødelegge fiender ved å finne hull i deres rykte, og la offentligheten gjøre resten.\n\nI hverdagen: Vær kjent for én ting du alltid leverer på, og beskytt den. Svar rolig og med fakta på angrep på ryktet ditt; overreaksjon bekrefter dem."
+        },
+        {
+          "title": "Lov 6: Søk oppmerksomhet for enhver pris",
+          "body": "Alt bedømmes etter hvordan det ser ut; det som ikke sees, teller ikke. Forsvinn aldri i massen. Vær større, mer fargerik og mer mystisk enn de andre. Kontrovers er bedre enn glemsel.\n\nI hverdagen: Sørg for at arbeidet ditt blir sett av de riktige menneskene. Gjør presentasjoner minneverdige, og ha noe særegent som gjør deg lett å huske."
+        },
+        {
+          "title": "Lov 7: La andre gjøre arbeidet, men ta æren selv",
+          "body": "Bruk andres visdom, kunnskap og innsats for å fremme din egen sak. Det sparer tid og energi og gir deg et skinn av effektivitet. Greene legger til: sørg for at hjelperne aldri får ære nok til å true deg. (Lesning for egen beskyttelse: legg merke til når andre gjør dette mot deg, og dokumentér ditt eget bidrag.)\n\nI hverdagen: Bygg på det som finnes, deleger, og sørg for at det er ditt navn som knyttes til resultatet."
+        },
+        {
+          "title": "Lov 8: Få andre til å komme til deg. Bruk lokkemat",
+          "body": "Den som tvinger andre til å handle, har kontrollen. Lokk motparten til deg med noe fristende, og la dem forlate sine egne planer. Da spiller de på din bane, med din timing. Selv en fiende som kommer til deg, kommer på dine vilkår.\n\nI hverdagen: Ikke jag etter muligheter så det synes; bygg noe som får folk til å ta kontakt. Sett møtet på ditt kontor, på ditt tidspunkt."
+        },
+        {
+          "title": "Lov 9: Vinn gjennom handlinger, aldri gjennom argumenter",
+          "body": "En kortvarig seier i en diskusjon er en pyrrhosseier: bitterheten varer lenger enn enigheten. Det er langt mektigere å vise enn å forklare; ingen blir fornærmet av å bli demonstrert for. Handlinger overbeviser uten å såre.\n\nI hverdagen: I stedet for å diskutere om noe vil virke, lag en liten prototype eller et konkret eksempel. La resultatet tale."
+        },
+        {
+          "title": "Lov 10: Unngå de ulykkelige og uheldige, det smitter",
+          "body": "Følelser er like smittsomme som sykdom. Folk som stadig er i krise, drar andre ned med seg, og du kan drukne i forsøket på å hjelpe. Omgi deg i stedet med lykkelige og heldige mennesker, og la det smitte over på deg.\n\nI hverdagen: Legg merke til hvem som gir energi og hvem som tapper den, og la det styre hvor du bruker tiden din. Hjelp gjerne, men ikke la deg trekke inn i dramaet."
+        },
+        {
+          "title": "Lov 11: Gjør folk avhengige av deg",
+          "body": "For å beholde uavhengighet må du være nødvendig. Jo mer noen trenger deg, jo større frihet har du. Lær aldri folk nok til at de kan klare seg uten deg, sier Greene. (Til egen bruk: vær den som løser problemer ingen andre kan, uten å skape kunstige flaskehalser.)\n\nI hverdagen: Bygg spisskompetanse som er vanskelig å erstatte, og sørg for at nøkkelpersoner vet hva du bidrar med."
+        },
+        {
+          "title": "Lov 12: Bruk selektiv ærlighet og raushet for å avvæpne",
+          "body": "Én oppriktig og ærlig gest kan dekke over dusinvis av uærlige. En uventet gave eller en åpenhjertig innrømmelse gjør folk mindre på vakt. Trojanerhesten kom som et offer. Vær forsiktig med folk som gir uventet mye.\n\nI hverdagen: Vær raus og åpen i starten av en relasjon; det setter tonen. Og legg merke til når andre bruker den samme teknikken på deg."
+        },
+        {
+          "title": "Lov 13: Be om hjelp ved å appellere til egeninteresse, aldri til medfølelse eller takknemlighet",
+          "body": "Skal du ha hjelp, ikke minn folk på hva du har gjort for dem; det virker som et krav. Finn heller ut hva den andre får ut av å hjelpe deg, og legg vekt på det. Egeninteresse er den sterkeste drivkraften, og folk liker å føle at de tjener på å hjelpe.\n\nI hverdagen: Formuler forespørsler med den andres gevinst først: «Dette vil gi dere ...» ikke «husk at jeg hjalp deg i fjor»."
+        },
+        {
+          "title": "Lov 14: Opptre som venn, arbeid som spion",
+          "body": "Kunnskap om motparten er avgjørende. Still indirekte spørsmål og lytt til det folk avslører om sine svakheter og planer i sosiale sammenhenger. Enhver anledning er en anledning til å lære. (Husk at andre gjør det samme; den som lytter mest, avslører minst.)\n\nI hverdagen: Snakk mindre om deg selv på fester og i lunsjen; still spørsmål. Du lærer mer om organisasjonen der enn i noen rapport."
+        },
+        {
+          "title": "Lov 15: Knus fienden fullstendig",
+          "body": "Halvveis knuste fiender kommer tilbake sterkere og bitrere. Greene mener en fiende du lar overleve vil søke hevn, så la den ikke få sjansen: ta bort makten, ikke bare seieren. Nøkkelen er å ikke stoppe halvveis.\n\nI hverdagen: Når du velger å ta en konflikt, ta den helt til en varig løsning. Ellers: velg den ikke. Halve tiltak avler nye konflikter."
+        },
+        {
+          "title": "Lov 16: Bruk fravær for å øke respekt og verdi",
+          "body": "For mye tilstedeværelse gjør deg vanlig. Er du alltid tilgjengelig, faller verdien din; trekker du deg tilbake på rett tidspunkt, øker den. Alt som er knapt oppleves som verdifullt. Skap en følelse av savn.\n\nI hverdagen: Ikke svar på alt umiddelbart, ikke vær med i alle møter, og la ferier være ferier. Det du er borte fra, legger merke til deg når du kommer tilbake."
+        },
+        {
+          "title": "Lov 17: Vær uforutsigbar",
+          "body": "Mennesker søker mønstre og bruker dem til å kontrollere deg. En dose uforutsigbarhet holder andre ute av balanse og gjør at de bruker energi på å tolke deg. Brukt i blant er det skremmende og effektivt.\n\nI hverdagen: Bryt av og til dine egne vaner i forhandlinger og konflikter: vær hard der du pleier å være myk, og omvendt. Vær aldri lett å regne ut."
+        },
+        {
+          "title": "Lov 18: Bygg ikke festning. Isolasjon er farlig",
+          "body": "Verden er farlig, og det er fristende å trekke seg tilbake. Men isolasjon kutter deg fra informasjon, og gjør deg til et lett mål. Beskyttelse finner du blant folk: allierte, nettverk og bevegelse. Skjul deg i mengden.\n\nI hverdagen: Hold kontakt med folk utenfor ditt eget team og din egen boble. Den som er godt koblet, får varsler før stormen kommer."
+        },
+        {
+          "title": "Lov 19: Vit hvem du har med å gjøre. Fornærm ikke den gale personen",
+          "body": "Folk reagerer helt forskjellig på det samme. Noen glemmer en fornærmelse, andre bruker resten av livet på å hevne den. Feilvurder ikke motparten: den stille kan være den farligste, og den som virker svak kan ha lang hukommelse og lange armer.\n\nI hverdagen: Vær høflig mot alle, uansett hvor de står nå. Og finn ut hvem du snakker med før du tar sjanser."
+        },
+        {
+          "title": "Lov 20: Bind deg ikke til noen",
+          "body": "Den som løper etter andre, mister kontroll. Ved å holde deg uavhengig, blir du den alle vil ha på sin side, og du kan spille partene mot hverandre. Forplikt deg ikke til noen sak eller side før det er nødvendig, og hold deg over stridighetene.\n\nI hverdagen: Ikke ta stilling i kontorpolitikk du ikke må ta stilling i. Vær vennlig med alle leire; det gir deg innflytelse hos alle."
+        },
+        {
+          "title": "Lov 21: Virk dummere enn den du vil overliste",
+          "body": "Ingen liker å føle seg dummere enn andre. Får du motparten til å føle seg smart, slår de av vaktholdet og undervurderer deg. Det er en kraftig fordel. Å virke litt uvitende koster ingenting.\n\nI hverdagen: Still «dumme» spørsmål i forhandlinger og la den andre forklare. Du lærer mye, og de blir trygge nok til å avsløre mer enn de burde."
+        },
+        {
+          "title": "Lov 22: Bruk overgivelse: gjør svakhet til makt",
+          "body": "Er du svakere, kjemp ikke for æren; overgi deg. Det gir deg tid til å komme til hektene, irriterer motstanderen som ikke får noe å kjempe mot, og lar du deres seier bli deres undergang. Gjør overgivelse til et verktøy, ikke en ydmykelse.\n\nI hverdagen: Når du taper en runde, taper med letthet og uten drama. Spar kreftene til en kamp du kan vinne."
+        },
+        {
+          "title": "Lov 23: Konsentrer kreftene",
+          "body": "Intensitet slår spredning. Spar styrke og energi ved å konsentrere dem mot ett punkt av gangen. Finn den ene rike kilden som gir mest, og hold deg der, framfor å grave mange grunne hull. Fokus vinner i det lange løp.\n\nI hverdagen: Velg det ene prosjektet eller den ene relasjonen som gir mest, og gi det din fulle innsats. Si nei til resten."
+        },
+        {
+          "title": "Lov 24: Spill den perfekte hoffmann",
+          "body": "Hoffmannen trives i en verden der alt kretser rundt makt og politisk kløkt: smigrer indirekte, tilpasser seg, er uunnværlig uten å skryte, og får ting gjort med diskresjon. Kunsten er å påvirke uten å bli sett som den som påvirker.\n\nI hverdagen: Vær aldri budbringer av dårlig nytt om du kan unngå det, fremstå avslappet, kritiser aldri sjefen offentlig, og be sjelden om tjenester."
+        },
+        {
+          "title": "Lov 25: Skap deg selv på nytt",
+          "body": "Ikke godta de rollene samfunnet gir deg. Skap din egen identitet, en som fanger oppmerksomhet og aldri blir kjedelig. Vær herre over din egen framstilling: gjør deg til en karakter, med kontroll over inntrykket du gir.\n\nI hverdagen: Bestem bevisst hvordan du vil oppfattes på jobb, og handle konsekvent i tråd med det. Fortiden din trenger ikke definere deg."
+        },
+        {
+          "title": "Lov 26: Hold hendene rene",
+          "body": "Du må framstå som et bilde av effektivitet og ordentlighet. Skjul feil og ubehagelige handlinger ved å la andre stå for det skitne arbeidet, eller finne syndebukker. (Til egen beskyttelse: pass på at du ikke blir noens rene hender eller syndebukk.)\n\nI hverdagen: La ikke ditt navn knyttes til rot og konflikt. Og vær årvåken når du blir bedt om å «bare ta den samtalen» på vegne av noen andre."
+        },
+        {
+          "title": "Lov 27: Spill på folks behov for å tro",
+          "body": "Mennesker har et enormt behov for å tro på noe. Gi dem et løfte, hold det vagt men entusiastisk, dyrk ritualer og fellesskap, og krev offer: da får du følgere. Enkelhet og et fiendebilde forsterker det hele. Greene beskriver hvordan kultliknende følge skapes; det er også en advarsel om hva du bør gjennomskue.\n\nI hverdagen: Legg merke til når noen selger deg en visjon uten detaljer. Spør etter substans."
+        },
+        {
+          "title": "Lov 28: Gå til handling med dristighet",
+          "body": "Er du usikker på om du skal gjøre noe, ikke gjør det halvhjertet. Tvil og nøling smitter og svekker gjennomføringen. Dristighet skremmer og imponerer; feil gjort med mot rettes lettere enn feil gjort av frykt. Ingen ærer den forsiktige.\n\nI hverdagen: Når du har bestemt deg, gå inn med full kraft: be om det høye tallet, ta ordet først, still det vanskelige spørsmålet."
+        },
+        {
+          "title": "Lov 29: Planlegg helt til slutten",
+          "body": "Slutten er alt. Planlegg hele veien dit, ta høyde for konsekvenser, hindringer og tilfeldigheter. Ved å tenke hele veien fram, blir du ikke overveldet av omstendighetene, og du vet når du skal stoppe. De fleste kaster seg ut uten å vite hvor de skal.\n\nI hverdagen: Før du starter et prosjekt eller en konflikt, skriv ned hvordan det skal se ut når det er ferdig, og hva som kan gå galt på veien."
+        },
+        {
+          "title": "Lov 30: La prestasjonene virke lette",
+          "body": "Det du gjør må virke naturlig og uanstrengt. Skjul strevet og trikset bak. Snakker du om hvor hardt du jobbet, blir folk mindre imponert, ikke mer. Mesteren virker som om det kom av seg selv.\n\nI hverdagen: Vis resultatet, ikke slitet. Ikke forklar hvor mange timer det tok; la kvaliteten tale."
+        },
+        {
+          "title": "Lov 31: Kontroller alternativene",
+          "body": "Den beste måten å få viljen sin er å la folk velge, men mellom alternativer du har bestemt. De føler seg frie, men resultatet tjener deg uansett. Å gi valg mellom det mindre onde og det du egentlig ønsker, er spesielt effektivt.\n\nI hverdagen: Legg fram to eller tre alternativer du kan leve med, i stedet for å spørre åpent «hva vil du?». Folk velger gjerne blant det som ligger på bordet."
+        },
+        {
+          "title": "Lov 32: Spill på folks fantasier",
+          "body": "Sannheten er ofte kjedelig og ubehagelig, og den som forteller den, blir ikke elsket. Folk søker det som lover en flukt fra det vanlige. Den som kan konjurere fram et romantisk bilde av en bedre framtid, får følge. (Vær samtidig klar over dette når du selv blir solgt en drøm.)\n\nI hverdagen: Når du presenterer en idé, mal bildet av hvordan livet blir etterpå, ikke bare hva det koster."
+        },
+        {
+          "title": "Lov 33: Finn hvert menneskes svake punkt",
+          "body": "Alle har et svakt punkt: en usikkerhet, en ukontrollert følelse, et hemmelig behov eller en liten glede de ikke kan si nei til. Finner du det, har du et håndtak. Legg merke til hverdagens små signaler: hva folk snakker om, hva de reagerer på, hva de gjør når de tror ingen ser.\n\nI hverdagen: Bruk denne kunnskapen med varsomhet. Vel så viktig: kjenn ditt eget svake punkt, så ingen andre får bruke det."
+        },
+        {
+          "title": "Lov 34: Vær kongelig på din egen måte",
+          "body": "Du blir behandlet slik du oppfører deg. Framstår du vanlig og usikker, får du ingen respekt. Med verdighet, ro og tro på egen verdi signaliserer du at du fortjener en krone. Det handler ikke om arroganse, men om å ikke be om tillatelse til å være der du er.\n\nI hverdagen: Snakk rolig, be ikke om unnskyldning for å ta plass, og krev det du er verdt uten å forklare deg."
+        },
+        {
+          "title": "Lov 35: Mestre kunsten å time",
+          "body": "Virk aldri travel; hastverk avslører mangel på kontroll. Vær tålmodig: lær å oppdage tidens ånd og trendene som vil bringe deg til makt. Vent når tiden ikke er inne, og slå til hardt når den er det. Tid er også et våpen.\n\nI hverdagen: Ikke send den sinte e-posten i dag. Ikke be om lønnsøkning i budsjettkuttmåneden. Vent på øyeblikket når kraften din har størst effekt."
+        },
+        {
+          "title": "Lov 36: Forakt det du ikke kan få. Å ignorere er den beste hevn",
+          "body": "Ved å gi et lite problem oppmerksomhet gjør du det stort og virkelig. Det du ikke kan få, gir du makt ved å ønske det. Oversett en fornærmelse eller en motstander, så viser du at de ikke betyr noe. Det svir mer enn noe svar.\n\nI hverdagen: Ikke svar på småprovokasjoner. Legg merke til hvor mye ro og tid du får tilbake."
+        },
+        {
+          "title": "Lov 37: Skap overbevisende spektakler",
+          "body": "Slående bilder og store symbolske gester skaper en aura av makt som alle reagerer på. Bruk visuelle og symbolske grep som får folk til å huske deg, og la det være mer å se enn å lese. Ord kan diskuteres; bilder fester seg.\n\nI hverdagen: Bruk symboler, sterke bilder og små seremonier for det du vil framheve. En godt iscenesatt lansering slår et memo."
+        },
+        {
+          "title": "Lov 38: Tenk som du vil, men oppfør deg som andre",
+          "body": "Viser du fram utradisjonelle ideer for tydelig, tror folk du kun vil ha oppmerksomhet og at du ser ned på dem. De finner en måte å straffe deg for det. Bland deg inn, del det originale bare med tolerante venner og med dem som vil sette pris på det.\n\nI hverdagen: Velg dine kamper for særegenhet. Følg de sosiale spillereglene der de ikke koster deg noe, og bruk krefter på det som virkelig betyr noe."
+        },
+        {
+          "title": "Lov 39: Rør opp vannet for å fange fisken",
+          "body": "Sinne og følelser er strategisk kontraproduktivt. Hold hodet kaldt og objektivt, mens du gjør fiender sinte: da mister de kontroll og gjør feil. Finn deres svake punkt, rugg i det, og se dem miste balansen.\n\nI hverdagen: Når noen forsøker å provosere deg, registrer det som en teknikk og senk tempoet. Den som holder seg rolig, styrer."
+        },
+        {
+          "title": "Lov 40: Forakt gratislunsjen",
+          "body": "Det som er gratis, er farlig; det innebærer ofte et triks eller en skjult forpliktelse. Det som har verdi er verdt å betale for; da slipper du takknemlighetsgjeld og bekymring. Raushet er også et maktsignal: den som betaler, bestemmer.\n\nI hverdagen: Betal for det du trenger. Vær forsiktig med å ta imot tjenester du ikke vet prisen på."
+        },
+        {
+          "title": "Lov 41: Unngå å tre inn i en stor manns sko",
+          "body": "Det som skjer først, virker alltid mer originalt enn det som følger. Følger du en stor forgjenger, må du overgå dem med det dobbelte for å skinne. Etabler ditt eget navn og din egen retning, og bryt med fortiden på en tydelig måte.\n\nI hverdagen: Overtar du etter en populær leder eller et vellykket prosjekt, ikke kopier. Definer din egen periode fra dag én."
+        },
+        {
+          "title": "Lov 42: Slå gjeteren, så sprer sauene seg",
+          "body": "Problemer kan ofte spores tilbake til én sterk person: en oppvigler, en arrogant underordnet, en som forgifter stemningen. Gi ikke slike rom til å operere; isoler eller fjern dem. Følgerne løser seg opp uten leder.\n\nI hverdagen: Når et team sliter, se etter den ene som setter tonen. Ta tak i den personen direkte, ikke i gruppen."
+        },
+        {
+          "title": "Lov 43: Arbeid med hjertene og hodene til andre",
+          "body": "Tvang skaper motreaksjon. Du må forføre folk til å ville gå din vei. Forfør ved å spille på deres individuelle psykologi og svakheter, og myk dem opp gjennom følelsene: det de frykter, elsker og savner. Ignorerer du folks hjerter, kommer de til å hate deg.\n\nI hverdagen: Før du overtaler, finn ut hva som beveger den enkelte. Ett argument passer ikke alle."
+        },
+        {
+          "title": "Lov 44: Avvæpne og irriter med speileffekten",
+          "body": "Speil det folk gjør, og de mister evnen til å lese strategien din. Speileffekten håner og ydmyker dem, og får dem til å overreagere. Å holde opp et speil for deres psyke forfører dem med illusjonen om at du deler deres verdier.\n\nI hverdagen: I konflikt: gjenta rolig det den andre gjør og sier. Det avvæpner mer effektivt enn motargumenter."
+        },
+        {
+          "title": "Lov 45: Forkynn behovet for endring, men reformer aldri for mye på én gang",
+          "body": "Alle forstår behovet for endring i teorien, men i praksis er vi vaner og rutiner. For mye omveltning skaper opprør. Vis respekt for det gamle, kle det nye i gamle klær, og gjør endringene gradvis.\n\nI hverdagen: Innfører du nye rutiner, knytt dem til noe kjent og ta ett steg om gangen. Snakk om forbedring, ikke revolusjon."
+        },
+        {
+          "title": "Lov 46: Fremstå aldri for perfekt",
+          "body": "Å virke bedre enn andre er alltid farlig, men mest farlig er det å virke uten feil eller svakheter. Misunnelse skaper stille fiender. Det er klokt å av og til vise fram små feil og innrømme uskyldige svakheter, så du framstår menneskelig.\n\nI hverdagen: Del noe du sliter med. Gi æren for suksesser til flaks og team, og la ikke andre føle at de aldri kan nå deg."
+        },
+        {
+          "title": "Lov 47: Gå ikke forbi målet. Lær å stoppe i seier",
+          "body": "Øyeblikket etter seier er farligst. I heten av triumf blir vi arrogante og overmodige og skaper flere fiender enn vi beseiret. Ikke la suksessen gjøre deg grådig. Sett et mål, og stopp når du har nådd det.\n\nI hverdagen: Har du vunnet forhandlingen, slutt å forhandle. Har du fått det du kom for, gå fornøyd hjem."
+        },
+        {
+          "title": "Lov 48: Vær formløs",
+          "body": "Ved å ta en form og ha en synlig plan, åpner du deg for angrep. Vær i stedet tilpasningsdyktig og i bevegelse. Godta at ingenting er sikkert og at ingen lov er fast. Den beste beskyttelsen er å være like flytende og formløs som vann.\n\nI hverdagen: Bind deg ikke til én måte å løse ting på. Når omstendighetene endrer seg, endre deg først."
+        }
+      ]
+    }
+  ]
+}

@@ -117,6 +117,7 @@ button { font: inherit; }
   font-size: .95rem;
 }
 .panel h2 { font-size: 1.05rem; margin: 0 0 .5rem; }
+.panel h3 { font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: .9rem 0 .2rem; }
 .panel ul { list-style: none; margin: 0; padding: 0; }
 .panel li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
 .panel li:first-child { border-top: 0; }
@@ -135,6 +136,15 @@ button { font: inherit; }
   padding: .9rem 0 .8rem;
   border-bottom: 1px solid var(--line);
 }
+.post.book {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: .8rem .9rem;
+  margin: .6rem 0;
+}
+.post.book .tag { background: var(--accent); color: var(--accent-fg); }
+.post.book .title { font-size: 1.05rem; }
 .post.unread .title::before { content: "●"; color: var(--accent); font-size: .55em; vertical-align: middle; margin-right: .35em; }
 .meta {
   display: flex;

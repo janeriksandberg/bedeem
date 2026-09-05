@@ -38,6 +38,8 @@
     sources: [],          // fra sources.json / index.json
     index: null,          // data/index.json
     items: [],            // sortert nyest først, filtrert på skjulte kilder, kuttet til buffer
+    books: [],            // bok-påminnelser fra books.json
+    display: [],          // items med bokkort flettet inn
     rendered: 0,
     offline: !navigator.onLine,
     loading: false,
@@ -125,11 +127,45 @@
     if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
     return res.json();
   }
+  const BOOKS_ID = 'books';
   async function loadSources() {
     try {
       const cfg = await fetchJson('sources.json', { cache: 'no-cache' });
       state.sources = cfg.sources || [];
     } catch { /* faller tilbake til index.sources */ }
+    try {
+      const b = await fetchJson('books.json', { cache: 'no-cache' });
+      state.books = [];
+      for (const book of b.books || []) {
+        (book.cards || []).forEach((c, i) => state.books.push({
+          id: `book:${book.id}:${i}`, _book: true, source: BOOKS_ID, title: c.title, body: c.body,
+          bookTitle: book.title, authors: book.authors,
+        }));
+      }
+    } catch { state.books = []; }
+    if (!state.sources.some((s) => s.id === BOOKS_ID)) {
+      state.sources.push({ id: BOOKS_ID, name: 'Bok-påminnelser', short: 'Bok', group: 'Påminnelser', type: 'books', ok: true, count: state.books.length });
+    }
+  }
+
+  // Flett inn bokkort: maks 1 av 10, minst 1 av 30. Tilfeldig rekkefølge, ingen gjentak før alle er vist.
+  function buildDisplay() {
+    const items = state.items;
+    if (!state.books.length || settings.hidden.includes(BOOKS_ID) || items.length < 10) return items.slice();
+    const deck = state.books.slice();
+    for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+    let di = 0;
+    const out = [];
+    let gap = Math.floor(Math.random() * 10); // varierende start
+    for (const it of items) {
+      out.push(it);
+      gap++;
+      if (gap >= 29 || (gap >= 10 && Math.random() < 0.1)) {
+        out.push(deck[di++ % deck.length]);
+        gap = 0;
+      }
+    }
+    return out;
   }
   async function loadFeed({ keepScroll = false } = {}) {
     if (state.loading) return;
@@ -203,23 +239,24 @@
   function renderReset() {
     feedEl.innerHTML = '';
     state.rendered = 0;
+    state.display = buildDisplay();
     if (!state.items.length) {
       feedEl.innerHTML = `<p class="empty">Ingen innlegg å vise${settings.hidden.length ? ' – sjekk hvilke kilder som er skrudd av under «Kilder»' : ''}.</p>`;
     }
     renderMore();
   }
   function renderMore() {
-    const end = Math.min(state.items.length, state.rendered + BATCH);
+    const end = Math.min(state.display.length, state.rendered + BATCH);
     if (state.rendered >= end) { renderFoot(); return; }
     const frag = document.createDocumentFragment();
-    for (let i = state.rendered; i < end; i++) frag.appendChild(renderPost(state.items[i]));
+    for (let i = state.rendered; i < end; i++) frag.appendChild(renderPost(state.display[i]));
     feedEl.appendChild(frag);
     state.rendered = end;
     requestAnimationFrame(measureClamps);
     renderFoot();
   }
   function renderFoot() {
-    const total = state.items.length;
+    const total = state.display.length;
     if (!total) { footEl.innerHTML = ''; return; }
     if (state.rendered < total) { footEl.textContent = `${state.rendered} av ${total} vist – bla videre`; return; }
     const more = document.createElement('button');
@@ -232,7 +269,19 @@
     else footEl.insertAdjacentHTML('beforeend', '<div>Det finnes ikke eldre innlegg i arkivet.</div>');
   }
 
+  function renderBookCard(it) {
+    const art = document.createElement('article');
+    art.className = 'post book';
+    art.dataset.id = it.id;
+    art.innerHTML = `
+      <div class="meta"><span class="tag">Bok</span><span>${esc(it.bookTitle)}</span><span>${esc(it.authors || '')}</span></div>
+      <h2 class="title">${esc(it.title)}</h2>
+      <div class="body clamp">${paragraphs(it.body)}</div>`;
+    return art;
+  }
+
   function renderPost(it) {
+    if (it._book) return renderBookCard(it);
     const src = sourceById(it.source);
     const art = document.createElement('article');
     art.className = 'post' + (lastVisit && new Date(it.time).getTime() > lastVisit ? ' unread' : '');
@@ -354,18 +403,29 @@
   function renderPanel() {
     if (panelEl.hidden) return;
     const hidden = new Set(settings.hidden);
-    const rows = state.sources.map((s) => {
-      const dot = s.ok === false ? 'err' : s.warn ? 'warn' : s.ok ? 'ok' : '';
-      const info = s.error ? `Feil: ${s.error}` : s.warn ? s.warn : s.lastOk ? `Hentet ${fmtRel(s.lastOk)}${s.count ? ` · ${s.count} innlegg` : ''}` : 'Ikke hentet ennå';
-      return `<li>
-        <label><input type="checkbox" data-src="${esc(s.id)}" ${hidden.has(s.id) ? '' : 'checked'}>
-          <span><span class="tag">${esc(s.short || s.name)}</span> ${esc(s.name)}<br><span class="meta">${esc(info)}</span></span></label>
-        <span class="dot ${dot}" title="${esc(info)}"></span>
-      </li>`;
+    const groups = new Map();
+    for (const s of state.sources) {
+      const g = s.group || 'Andre';
+      if (!groups.has(g)) groups.set(g, []);
+      groups.get(g).push(s);
+    }
+    const sections = [...groups].map(([g, list]) => {
+      const rows = list.map((s) => {
+        const dot = s.ok === false ? 'err' : s.warn ? 'warn' : s.ok ? 'ok' : '';
+        let info;
+        if (s.type === 'books') info = `${s.count} kort, flettes inn mellom innleggene`;
+        else info = s.error ? `Feil: ${s.error}` : s.warn ? s.warn : s.lastOk ? `Hentet ${fmtRel(s.lastOk)}${s.count ? ` · ${s.count} innlegg` : ''}` : 'Ikke hentet ennå';
+        return `<li>
+          <label><input type="checkbox" data-src="${esc(s.id)}" ${hidden.has(s.id) ? '' : 'checked'}>
+            <span><span class="tag">${esc(s.short || s.name)}</span> ${esc(s.name)}<br><span class="meta">${esc(info)}</span></span></label>
+          <span class="dot ${dot}" title="${esc(info)}"></span>
+        </li>`;
+      });
+      return `<h3>${esc(g)}</h3><ul>${rows.join('')}</ul>`;
     });
     panelEl.innerHTML = `
       <h2>Kilder</h2>
-      <ul>${rows.join('')}</ul>
+      ${sections.join('')}
       <div class="small">Valgene lagres på denne enheten (enhets-id ${esc(settings.device)}). Ingen pålogging.
       Innholdet hentes hvert 10. minutt og alt i bufferen kan leses uten nett.
       Nye kilder legges til i <code>sources.json</code> i GitHub-repoet.</div>`;

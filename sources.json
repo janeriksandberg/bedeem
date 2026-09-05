@@ -1,10 +1,11 @@
 {
-  "_help": "Legg til en ny kilde ved å legge inn et nytt objekt i listen. Typer: rss (RSS/Atom-feed), reddit (subreddit), invision (Invision Community-forum, f.eks. Kvinneguiden), entur (avvik for tog via Entur). Feltet 'short' vises som merkelapp i appen.",
+  "_help": "Legg til en ny kilde ved å legge inn et nytt objekt i listen. Typer: rss (RSS/Atom-feed), reddit (subreddit; valgfritt listing=new|hot|top og t=day|week), invision (Invision Community-forum, f.eks. Kvinneguiden), entur (avvik for tog via Entur), cisa-kev (CISA Known Exploited Vulnerabilities, JSON). Feltet 'short' vises som merkelapp i appen, 'group' brukes til gruppering i Kilder-panelet.",
   "sources": [
     {
       "id": "vy-sande",
       "name": "Vy · tog Sande–Oslo",
       "short": "Vy",
+      "group": "Norge",
       "type": "entur",
       "stopPlaces": ["NSR:StopPlace:58871"],
       "lines": ["VYG:Line:RE11", "VYG:Line:RX11"],
@@ -12,58 +13,31 @@
       "keywords": ["Vestfoldbanen", "Sande", "Drammen", "Holmestrand", "Oslo S", "Skien", "Tønsberg"],
       "url": "https://www.vy.no/"
     },
-    {
-      "id": "r-norge",
-      "name": "r/norge",
-      "short": "r/norge",
-      "type": "reddit",
-      "subreddit": "norge",
-      "listing": "new"
-    },
-    {
-      "id": "r-norske",
-      "name": "r/norske",
-      "short": "r/norske",
-      "type": "reddit",
-      "subreddit": "norske",
-      "listing": "new"
-    },
-    {
-      "id": "r-aita",
-      "name": "r/AmItheAsshole",
-      "short": "AITA",
-      "type": "reddit",
-      "subreddit": "AmItheAsshole",
-      "listing": "hot"
-    },
-    {
-      "id": "r-norway",
-      "name": "r/norway",
-      "short": "r/norway",
-      "type": "reddit",
-      "subreddit": "norway",
-      "listing": "new"
-    },
-    {
-      "id": "kvinneguiden",
-      "name": "Kvinneguiden forum",
-      "short": "KG",
-      "type": "invision",
-      "url": "https://forum.kvinneguiden.no/discover/"
-    },
-    {
-      "id": "vg",
-      "name": "VG",
-      "short": "VG",
-      "type": "rss",
-      "url": "https://www.vg.no/rss/feed/?limit=100"
-    },
-    {
-      "id": "nettavisen",
-      "name": "Nettavisen",
-      "short": "NA",
-      "type": "rss",
-      "url": "https://www.nettavisen.no/service/rich-rss"
-    }
+    { "id": "vg", "name": "VG", "short": "VG", "group": "Norge", "type": "rss", "url": "https://www.vg.no/rss/feed/?limit=100" },
+    { "id": "nettavisen", "name": "Nettavisen", "short": "NA", "group": "Norge", "type": "rss", "url": "https://www.nettavisen.no/service/rich-rss" },
+    { "id": "filternyheter", "name": "Filter Nyheter", "short": "Filter", "group": "Norge", "type": "rss", "url": "https://filternyheter.no/feed/" },
+    { "id": "document", "name": "Document.no", "short": "Doc", "group": "Norge", "type": "rss", "url": "https://www.document.no/feed/" },
+    { "id": "kvinneguiden", "name": "Kvinneguiden forum", "short": "KG", "group": "Norge", "type": "invision", "url": "https://forum.kvinneguiden.no/discover/" },
+
+    { "id": "r-norge", "name": "r/norge", "short": "r/norge", "group": "Reddit", "type": "reddit", "subreddit": "norge", "listing": "new" },
+    { "id": "r-norske", "name": "r/norske", "short": "r/norske", "group": "Reddit", "type": "reddit", "subreddit": "norske", "listing": "new" },
+    { "id": "r-norway", "name": "r/norway", "short": "r/norway", "group": "Reddit", "type": "reddit", "subreddit": "norway", "listing": "new" },
+    { "id": "r-aita", "name": "r/AmItheAsshole", "short": "AITA", "group": "Reddit", "type": "reddit", "subreddit": "AmItheAsshole", "listing": "hot" },
+    { "id": "r-all-top", "name": "Reddit topp 100 (siste døgn)", "short": "Reddit", "group": "Reddit", "type": "reddit", "subreddit": "all", "listing": "top", "t": "day" },
+
+    { "id": "ncsc-varsler", "name": "NSM · varsler fra NCSC", "short": "NCSC", "group": "Sikkerhet", "type": "rss", "url": "https://nsm.no/fagomrader/digital-sikkerhet/nasjonalt-cybersikkerhetssenter/varsler-fra-ncsc/rss" },
+    { "id": "nsm", "name": "NSM · nyheter og notater", "short": "NSM", "group": "Sikkerhet", "type": "rss", "url": "https://nsm.no/rss/nyheter-fra-nsm/" },
+    { "id": "msrc", "name": "Microsoft MSRC Update Guide", "short": "MSRC", "group": "Sikkerhet", "type": "rss", "url": "https://api.msrc.microsoft.com/update-guide/rss" },
+    { "id": "cisco-psirt", "name": "Cisco PSIRT", "short": "Cisco", "group": "Sikkerhet", "type": "rss", "url": "https://sec.cloudapps.cisco.com/security/center/psirtrss20/CiscoSecurityAdvisory.xml" },
+    { "id": "ivanti", "name": "Ivanti security advisories", "short": "Ivanti", "group": "Sikkerhet", "type": "rss", "url": "https://www.ivanti.com/blog/topics/security-advisory/rss" },
+    { "id": "cisa-kev", "name": "CISA Known Exploited Vulnerabilities", "short": "KEV", "group": "Sikkerhet", "type": "cisa-kev", "url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json" },
+    { "id": "cisa-adv", "name": "CISA advisories", "short": "CISA", "group": "Sikkerhet", "type": "rss", "url": "https://www.cisa.gov/cybersecurity-advisories/all.xml" },
+    { "id": "ncsc-uk", "name": "NCSC UK", "short": "NCSC UK", "group": "Sikkerhet", "type": "rss", "url": "https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml" },
+    { "id": "sans-isc", "name": "SANS Internet Storm Center", "short": "SANS", "group": "Sikkerhet", "type": "rss", "url": "https://isc.sans.edu/rssfeed_full.xml" },
+    { "id": "bleeping", "name": "BleepingComputer", "short": "Bleeping", "group": "Sikkerhet", "type": "rss", "url": "https://www.bleepingcomputer.com/feed/" },
+    { "id": "therecord", "name": "The Record", "short": "Record", "group": "Sikkerhet", "type": "rss", "url": "https://therecord.media/feed" },
+    { "id": "ms-ti", "name": "Microsoft Threat Intelligence", "short": "MS TI", "group": "Sikkerhet", "type": "rss", "url": "https://www.microsoft.com/en-us/security/blog/topic/threat-intelligence/feed/" },
+    { "id": "google-ti", "name": "Google Threat Intelligence / Mandiant", "short": "Mandiant", "group": "Sikkerhet", "type": "rss", "url": "https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/" },
+    { "id": "unit42", "name": "Unit 42", "short": "Unit 42", "group": "Sikkerhet", "type": "rss", "url": "https://unit42.paloaltonetworks.com/feed/" }
   ]
 }

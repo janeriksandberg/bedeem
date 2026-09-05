@@ -29,8 +29,24 @@ Legg til et objekt i `sources` i `sources.json`. Støttede typer:
 | `invision` | `url` til aktivitetsstrømmen i et Invision-forum         | Kvinneguiden             |
 | `entur`    | `stopPlaces`, `lines`, `authorities`, `keywords`, `url`  | Vy, tog Sande–Oslo       |
 
-Alle kilder har `id` (unik, brukes i fil-ID-er), `name` og `short` (merkelapp i
-appen). Sett `"enabled": false` for å skru en kilde av uten å slette den.
+| `cisa-kev` | `url` til CISA sin KEV-katalog (JSON)                    | CISA KEV                 |
+
+Alle kilder har `id` (unik, brukes i fil-ID-er), `name`, `short` (merkelapp i
+appen) og `group` (gruppering i Kilder-panelet). Sett `"enabled": false` for å
+skru en kilde av uten å slette den. For RSS begrenser `maxItems` (standard 200)
+hvor mange poster som beholdes fra feeder med mye historikk.
+
+Kilder som ikke kan hentes automatisk: forumet på freak.no (Cloudflare-sperre
+mot roboter) og Citrix' sikkerhetsbulletiner (siden bygges med JavaScript og har
+ingen feed).
+
+## Bok-påminnelser
+
+`books.json` inneholder korte oppsummeringer av poeng og teknikker fra bøker.
+Appen fletter dem inn tilfeldig mellom innleggene: maks ett kort per 10 innlegg,
+minst ett per 30. Kortene kan slås av under «Kilder». Legg til en bok ved å legge
+til et objekt med `id`, `title`, `authors` og en liste `cards` med `title` og
+`body`.
 
 ## Kjøre lokalt
 
@@ -40,7 +56,7 @@ node scripts/serve.mjs 8787   # statisk server på http://localhost:8787/
 ```
 
 Miljøvariabler: `REDDIT_COMMENT_BUDGET` (standard 10 tråder per kjøring),
-`INVISION_TOPIC_BUDGET` (20), `RETENTION_DAYS` (21).
+`INVISION_TOPIC_BUDGET` (20), `RETENTION_DAYS` (60).
 
 ## Reddit-tråder (anbefalt oppsett)
 
