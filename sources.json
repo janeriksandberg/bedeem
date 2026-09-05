@@ -19,6 +19,7 @@
     { "id": "document", "name": "Document.no", "short": "Doc", "group": "Norge", "type": "rss", "url": "https://www.document.no/feed/" },
     { "id": "kvinneguiden", "name": "Kvinneguiden forum", "short": "KG", "group": "Norge", "type": "invision", "url": "https://forum.kvinneguiden.no/discover/" },
     { "id": "itromso", "name": "iTromsø", "short": "iTromsø", "group": "Norge", "type": "rss", "url": "https://www.itromso.no/rss" },
+    { "id": "nordlys", "name": "Nordlys", "short": "Nordlys", "group": "Norge", "type": "rss", "url": "https://www.nordlys.no/service/rich-rss" },
     { "id": "sandeavis", "name": "Sande Avis", "short": "Sande Avis", "group": "Norge", "type": "rss", "url": "https://www.sandeavis.no/service/rich-rss" },
     { "id": "dt", "name": "Drammens Tidende", "short": "DT", "group": "Norge", "type": "rss", "url": "https://www.dt.no/service/rich-rss" },
     { "id": "politi-oslo", "name": "Politiloggen · Oslo", "short": "Politi Oslo", "group": "Norge", "type": "politiloggen", "districts": ["Oslo"], "url": "https://www.politiet.no/politiloggen/" },
@@ -37,7 +38,15 @@
     { "id": "r-dadjokes", "name": "r/dadjokes", "short": "Dadjokes", "group": "Reddit", "type": "reddit", "subreddit": "dadjokes", "listing": "hot" },
     { "id": "r-aitah", "name": "r/AITAH", "short": "AITAH", "group": "Reddit", "type": "reddit", "subreddit": "AITAH", "listing": "hot" },
     { "id": "r-ama", "name": "r/AMA", "short": "AMA", "group": "Reddit", "type": "reddit", "subreddit": "AMA", "listing": "hot" },
+    { "id": "r-europe", "name": "r/europe", "short": "r/europe", "group": "Reddit", "type": "reddit", "subreddit": "europe", "listing": "hot" },
+    { "id": "r-steam", "name": "r/Steam", "short": "r/Steam", "group": "Reddit", "type": "reddit", "subreddit": "Steam", "listing": "hot" },
+    { "id": "r-tromso", "name": "r/tromso", "short": "r/tromso", "group": "Reddit", "type": "reddit", "subreddit": "tromso", "listing": "new" },
+    { "id": "r-worldnews", "name": "r/worldnews", "short": "r/worldnews", "group": "Reddit", "type": "reddit", "subreddit": "worldnews", "listing": "hot" },
     { "id": "r-askreddit", "name": "r/AskReddit", "short": "AskReddit", "group": "Reddit", "type": "reddit", "subreddit": "AskReddit", "listing": "hot" },
+
+    { "id": "bbc", "name": "BBC News", "short": "BBC", "group": "Verden", "type": "rss", "url": "https://feeds.bbci.co.uk/news/rss.xml" },
+    { "id": "guardian", "name": "The Guardian", "short": "Guardian", "group": "Verden", "type": "rss", "url": "https://www.theguardian.com/international/rss" },
+    { "id": "euronews", "name": "Euronews", "short": "Euronews", "group": "Verden", "type": "rss", "url": "https://www.euronews.com/rss" },
 
     { "id": "ncsc-varsler", "name": "NSM · varsler fra NCSC", "short": "NCSC", "group": "Sikkerhet", "type": "rss", "url": "https://nsm.no/fagomrader/digital-sikkerhet/nasjonalt-cybersikkerhetssenter/varsler-fra-ncsc/rss" },
     { "id": "nsm", "name": "NSM · nyheter og notater", "short": "NSM", "group": "Sikkerhet", "type": "rss", "url": "https://nsm.no/rss/nyheter-fra-nsm/" },

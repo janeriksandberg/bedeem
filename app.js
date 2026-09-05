@@ -520,6 +520,17 @@
     renderPanel();
     loadFeed({ keepScroll: true });
   }
+  // Oppdaterer seksjonsboksen (og tellingen) i en gruppe etter at én kilde er krysset inn/ut.
+  function syncGroupBox(section) {
+    const box = section?.querySelector('input[data-grp]');
+    if (!box) return;
+    const all = [...section.querySelectorAll('input[data-src]')];
+    const on = all.filter((c) => c.checked).length;
+    box.checked = on === all.length;
+    box.indeterminate = on > 0 && on < all.length;
+    const cnt = section.querySelector('.grp-count');
+    if (cnt) cnt.textContent = `${on}/${all.length}`;
+  }
   function renderPanel() {
     if (panelEl.hidden) return;
     const hidden = new Set(settings.hidden);
@@ -557,11 +568,11 @@
           <label>Maks kort per 100 innlegg <input type="number" id="bookMax" min="0" max="100" step="1" inputmode="numeric" value="${settings.bookMax}"></label>
           <label>Minst kort per 100 innlegg <input type="number" id="bookMin" min="0" max="100" step="1" inputmode="numeric" value="${settings.bookMin}"></label>
         </div>` : '';
-      const grpBtns = `<span class="grp">
-        <button type="button" data-grp-none="${esc(g)}" title="Velg bort alle i ${esc(g)}" aria-label="Velg bort alle i ${esc(g)}">☐</button>
-        <button type="button" data-grp-all="${esc(g)}" title="Velg alle i ${esc(g)}" aria-label="Velg alle i ${esc(g)}">☑</button>
-      </span>`;
-      return `<h3><span>${esc(g)}</span>${grpBtns}</h3>${extra}<ul>${rows.join('')}</ul>`;
+      // Seksjonsboks i overskriften: krysser inn/ut alle kilder i gruppa. Delvis valgt vises som «–».
+      const on = list.filter((s) => !hidden.has(s.id)).length;
+      const grpBox = `<label class="grp"><input type="checkbox" data-grp="${esc(g)}" ${on === list.length ? 'checked' : ''} ${on > 0 && on < list.length ? 'data-some="1"' : ''}
+          title="Kryss inn/ut alle i ${esc(g)}" aria-label="Kryss inn/ut alle i ${esc(g)}"><span>${esc(g)}</span><span class="grp-count">${on}/${list.length}</span></label>`;
+      return `<section class="src-group"><h3>${grpBox}</h3>${extra}<ul>${rows.join('')}</ul></section>`;
     });
     const rl = rareLimit();
     const rareLabel = settings.rareStep === 0 ? 'færre enn 1' : rl === Infinity ? 'flere enn 100' : `færre enn ${rl}`;
@@ -587,12 +598,14 @@
       Innholdet hentes hvert 10. minutt og alt i bufferen kan leses uten nett.
       Nye kilder legges til i <code>sources.json</code>, bøker i <code>books.json</code>, i GitHub-repoet.</div>
       </div>`;
-    panelEl.querySelectorAll('input[type=checkbox]').forEach((cb) => cb.addEventListener('change', () => {
+    panelEl.querySelectorAll('input[data-some]').forEach((cb) => { cb.indeterminate = true; });
+    panelEl.querySelectorAll('input[data-src]').forEach((cb) => cb.addEventListener('change', () => {
       const id = cb.dataset.src;
       const list = settings.hidden.filter((x) => x !== id);
       if (!cb.checked) list.push(id);
       settings.hidden = list;
       saveSettings();
+      syncGroupBox(cb.closest('.src-group'));
       loadFeed({ keepScroll: true });
     }));
     panelEl.querySelectorAll('button[data-heart]').forEach((b) => b.addEventListener('click', () => {
@@ -632,17 +645,13 @@
     });
     const snap = () => { if (!hiddenSnapshot) hiddenSnapshot = settings.hidden.slice(); };
     const groupIds = (g) => state.sources.filter((s) => (s.group || 'Andre') === g).map((s) => s.id);
-    panelEl.querySelectorAll('button[data-grp-none]').forEach((b) => b.addEventListener('click', () => {
+    panelEl.querySelectorAll('input[data-grp]').forEach((cb) => cb.addEventListener('change', () => {
+      // Klikk på delvis valgt («–») krysser inn alle; ellers følger gruppa boksen.
       snap();
+      const ids = groupIds(cb.dataset.grp);
       const scroll = panelEl.scrollTop;
-      setHidden([...settings.hidden, ...groupIds(b.dataset.grpNone)]);
-      panelEl.scrollTop = scroll;
-    }));
-    panelEl.querySelectorAll('button[data-grp-all]').forEach((b) => b.addEventListener('click', () => {
-      snap();
-      const ids = new Set(groupIds(b.dataset.grpAll));
-      const scroll = panelEl.scrollTop;
-      setHidden(settings.hidden.filter((x) => !ids.has(x)));
+      if (cb.checked) setHidden(settings.hidden.filter((x) => !ids.includes(x)));
+      else setHidden([...settings.hidden, ...ids]);
       panelEl.scrollTop = scroll;
     }));
     $('#selNone').addEventListener('click', () => { snap(); setHidden(state.sources.map((s) => s.id)); });

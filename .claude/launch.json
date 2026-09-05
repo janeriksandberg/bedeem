@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "bedeem",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "C:/Users/mail/OneDrive/Dokumenter/Code/Bedeem/.claude/serve.ps1"],
+      "port": 8787
+    }
+  ]
+}
