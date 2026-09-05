@@ -3,9 +3,9 @@
   "vy-sande": {
    "name": "Vy · tog Sande–Oslo",
    "type": "entur",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 0,
    "lastAdded": 0,
    "lastRefreshed": 0
@@ -13,40 +13,40 @@
   "r-norge": {
    "name": "r/norge",
    "type": "reddit",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
-   "count": 108,
-   "lastAdded": 2,
-   "lastRefreshed": 0
+   "lastOk": "2026-09-05T12:52:18.481Z",
+   "count": 109,
+   "lastAdded": 1,
+   "lastRefreshed": 1
   },
   "r-norske": {
    "name": "r/norske",
    "type": "reddit",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
-   "count": 104,
-   "lastAdded": 2,
+   "lastOk": "2026-09-05T12:52:18.481Z",
+   "count": 105,
+   "lastAdded": 1,
    "lastRefreshed": 1,
    "warn": "Kommentarer: Reddit: tidsbudsjettet for denne kjøringen er brukt opp"
   },
   "r-aita": {
    "name": "r/AmItheAsshole",
    "type": "reddit",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
-   "count": 117,
-   "lastAdded": 4,
+   "lastOk": "2026-09-05T12:52:18.481Z",
+   "count": 118,
+   "lastAdded": 2,
    "lastRefreshed": 1
   },
   "r-norway": {
    "name": "r/norway",
    "type": "reddit",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 103,
    "lastAdded": 0,
    "lastRefreshed": 0
@@ -54,39 +54,39 @@
   "kvinneguiden": {
    "name": "Kvinneguiden forum",
    "type": "invision",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
-   "count": 55,
-   "lastAdded": 8,
+   "lastOk": "2026-09-05T12:52:18.481Z",
+   "count": 65,
+   "lastAdded": 10,
    "lastRefreshed": 10
   },
   "vg": {
    "name": "VG",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
-   "count": 113,
-   "lastAdded": 2,
+   "lastOk": "2026-09-05T12:52:18.481Z",
+   "count": 114,
+   "lastAdded": 1,
    "lastRefreshed": 0
   },
   "nettavisen": {
    "name": "Nettavisen",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 29,
-   "lastAdded": 1,
+   "lastAdded": 0,
    "lastRefreshed": 0
   },
   "filternyheter": {
    "name": "Filter Nyheter",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 10,
    "lastAdded": 0,
    "lastRefreshed": 0
@@ -94,29 +94,29 @@
   "document": {
    "name": "Document.no",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 16,
-   "lastAdded": 6,
+   "lastAdded": 0,
    "lastRefreshed": 0
   },
   "r-all-top": {
    "name": "Reddit topp 100 (siste døgn)",
    "type": "reddit",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
-   "count": 102,
-   "lastAdded": 2,
+   "lastOk": "2026-09-05T12:52:18.481Z",
+   "count": 103,
+   "lastAdded": 1,
    "lastRefreshed": 0
   },
   "ncsc-varsler": {
    "name": "NSM · varsler fra NCSC",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 10,
    "lastAdded": 8,
    "lastRefreshed": 0
@@ -124,9 +124,9 @@
   "nsm": {
    "name": "NSM · nyheter og notater",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 10,
    "lastAdded": 9,
    "lastRefreshed": 0
@@ -134,9 +134,9 @@
   "msrc": {
    "name": "Microsoft MSRC Update Guide",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 199,
    "lastAdded": 0,
    "lastRefreshed": 0
@@ -144,9 +144,9 @@
   "cisco-psirt": {
    "name": "Cisco PSIRT",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 50,
    "lastAdded": 14,
    "lastRefreshed": 0
@@ -154,9 +154,9 @@
   "ivanti": {
    "name": "Ivanti security advisories",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 19,
    "lastAdded": 17,
    "lastRefreshed": 0
@@ -164,9 +164,9 @@
   "cisa-kev": {
    "name": "CISA Known Exploited Vulnerabilities",
    "type": "cisa-kev",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 150,
    "lastAdded": 90,
    "lastRefreshed": 0
@@ -174,9 +174,9 @@
   "cisa-adv": {
    "name": "CISA advisories",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 30,
    "lastAdded": 0,
    "lastRefreshed": 0
@@ -184,9 +184,9 @@
   "ncsc-uk": {
    "name": "NCSC UK",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 20,
    "lastAdded": 7,
    "lastRefreshed": 0
@@ -194,9 +194,9 @@
   "sans-isc": {
    "name": "SANS Internet Storm Center",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 10,
    "lastAdded": 0,
    "lastRefreshed": 0
@@ -204,9 +204,9 @@
   "bleeping": {
    "name": "BleepingComputer",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 15,
    "lastAdded": 0,
    "lastRefreshed": 0
@@ -214,9 +214,9 @@
   "therecord": {
    "name": "The Record",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 5,
    "lastAdded": 0,
    "lastRefreshed": 0
@@ -224,9 +224,9 @@
   "ms-ti": {
    "name": "Microsoft Threat Intelligence",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 10,
    "lastAdded": 0,
    "lastRefreshed": 0
@@ -234,9 +234,9 @@
   "google-ti": {
    "name": "Google Threat Intelligence / Mandiant",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 20,
    "lastAdded": 11,
    "lastRefreshed": 0
@@ -244,13 +244,13 @@
   "unit42": {
    "name": "Unit 42",
    "type": "rss",
-   "lastRun": "2026-09-05T12:42:03.006Z",
+   "lastRun": "2026-09-05T12:52:18.481Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:42:03.006Z",
+   "lastOk": "2026-09-05T12:52:18.481Z",
    "count": 15,
    "lastAdded": 0,
    "lastRefreshed": 0
   }
  },
- "generated": "2026-09-05T12:42:03.006Z"
+ "generated": "2026-09-05T12:52:18.481Z"
 }
