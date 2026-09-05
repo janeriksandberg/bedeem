@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bedeem</title>
+<meta name="description" content="Alt du følger, samlet i én lettlest strøm som også virker uten nett.">
+<meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top" id="top">
+  <div class="row row1">
+    <a class="brand" href="#" id="brand" aria-label="Til toppen">Bedeem</a>
+    <span class="status" id="status" aria-live="polite">Laster …</span>
+  </div>
+  <div class="row row2">
+    <div class="group" aria-label="Tekststørrelse">
+      <button class="btn" id="fontDown" type="button" aria-label="Mindre tekst" title="Mindre tekst">A<span class="sub">−</span></button>
+      <button class="btn" id="fontUp" type="button" aria-label="Større tekst" title="Større tekst">A<span class="sub">+</span></button>
+    </div>
+    <div class="group" role="group" aria-label="Antall innlegg i buffer">
+      <button class="btn buf" type="button" data-n="50" title="50 innlegg i buffer">50</button>
+      <button class="btn buf" type="button" data-n="100" title="100 innlegg i buffer">100</button>
+      <button class="btn buf" type="button" data-n="1000" title="1000 innlegg i buffer">1000</button>
+    </div>
+    <div class="group">
+      <button class="btn" id="refresh" type="button" aria-label="Oppdater" title="Oppdater">↻</button>
+      <button class="btn" id="sourcesBtn" type="button" aria-expanded="false" aria-controls="sourcesPanel">Kilder</button>
+    </div>
+  </div>
+</header>
+
+<div class="banner" id="banner" hidden></div>
+
+<section class="panel" id="sourcesPanel" hidden aria-label="Kilder og innstillinger"></section>
+
+<main class="feed" id="feed" aria-live="polite"></main>
+<div id="sentinel" class="sentinel" aria-hidden="true"></div>
+<footer class="foot" id="foot"></footer>
+
+<script src="app.js"></script>
+</body>
+</html>

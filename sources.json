@@ -1,0 +1,69 @@
+{
+  "_help": "Legg til en ny kilde ved å legge inn et nytt objekt i listen. Typer: rss (RSS/Atom-feed), reddit (subreddit), invision (Invision Community-forum, f.eks. Kvinneguiden), entur (avvik for tog via Entur). Feltet 'short' vises som merkelapp i appen.",
+  "sources": [
+    {
+      "id": "vy-sande",
+      "name": "Vy · tog Sande–Oslo",
+      "short": "Vy",
+      "type": "entur",
+      "stopPlaces": ["NSR:StopPlace:58871"],
+      "lines": ["VYG:Line:RE11", "VYG:Line:RX11"],
+      "authorities": ["VYG:Authority:VY"],
+      "keywords": ["Vestfoldbanen", "Sande", "Drammen", "Holmestrand", "Oslo S", "Skien", "Tønsberg"],
+      "url": "https://www.vy.no/"
+    },
+    {
+      "id": "r-norge",
+      "name": "r/norge",
+      "short": "r/norge",
+      "type": "reddit",
+      "subreddit": "norge",
+      "listing": "new"
+    },
+    {
+      "id": "r-norske",
+      "name": "r/norske",
+      "short": "r/norske",
+      "type": "reddit",
+      "subreddit": "norske",
+      "listing": "new"
+    },
+    {
+      "id": "r-aita",
+      "name": "r/AmItheAsshole",
+      "short": "AITA",
+      "type": "reddit",
+      "subreddit": "AmItheAsshole",
+      "listing": "hot"
+    },
+    {
+      "id": "r-norway",
+      "name": "r/norway",
+      "short": "r/norway",
+      "type": "reddit",
+      "subreddit": "norway",
+      "listing": "new"
+    },
+    {
+      "id": "kvinneguiden",
+      "name": "Kvinneguiden forum",
+      "short": "KG",
+      "type": "invision",
+      "url": "https://forum.kvinneguiden.no/discover/"
+    },
+    {
+      "id": "vg",
+      "name": "VG",
+      "short": "VG",
+      "type": "rss",
+      "url": "https://www.vg.no/rss/feed/?limit=100"
+    },
+    {
+      "id": "nettavisen",
+      "name": "Nettavisen",
+      "short": "NA",
+      "type": "rss",
+      "url": "https://www.nettavisen.no/service/rich-rss"
+    }
+  ]
+}

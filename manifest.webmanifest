@@ -1,0 +1,15 @@
+{
+  "name": "Bedeem",
+  "short_name": "Bedeem",
+  "description": "Alt du følger, samlet i én lettlest strøm som også virker uten nett.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f4ef",
+  "theme_color": "#f6f4ef",
+  "lang": "nb",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

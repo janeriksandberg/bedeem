@@ -1,0 +1,43 @@
+name: Hent innhold
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hent-innhold
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Hent fra kildene
+        run: node scripts/fetch.mjs
+
+      - name: Commit og push data
+        run: |
+          git config user.name "bedeem-bot"
+          git config user.email "bot@bedeem.com"
+          git add -A data
+          if git diff --cached --quiet; then
+            echo "Ingen endringer i data."
+            exit 0
+          fi
+          git commit -m "data: oppdatert $(date -u +'%Y-%m-%d %H:%M UTC')"
+          for i in 1 2 3; do
+            if git pull --rebase --autostash && git push; then exit 0; fi
+            sleep 5
+          done
+          exit 1

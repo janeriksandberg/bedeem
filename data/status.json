@@ -1,0 +1,85 @@
+{
+ "sources": {
+  "vy-sande": {
+   "name": "Vy · tog Sande–Oslo",
+   "type": "entur",
+   "lastRun": "2026-09-05T10:12:28.778Z",
+   "ok": true,
+   "lastOk": "2026-09-05T10:12:28.778Z",
+   "count": 0,
+   "lastAdded": 0,
+   "lastRefreshed": 0
+  },
+  "r-norge": {
+   "name": "r/norge",
+   "type": "reddit",
+   "lastRun": "2026-09-05T10:12:28.778Z",
+   "ok": true,
+   "lastOk": "2026-09-05T10:12:28.778Z",
+   "count": 100,
+   "lastAdded": 100,
+   "lastRefreshed": 4
+  },
+  "r-norske": {
+   "name": "r/norske",
+   "type": "reddit",
+   "lastRun": "2026-09-05T10:12:28.778Z",
+   "ok": true,
+   "lastOk": "2026-09-05T10:12:28.778Z",
+   "count": 100,
+   "lastAdded": 100,
+   "lastRefreshed": 4
+  },
+  "r-aita": {
+   "name": "r/AmItheAsshole",
+   "type": "reddit",
+   "lastRun": "2026-09-05T10:12:28.778Z",
+   "ok": true,
+   "lastOk": "2026-09-05T10:12:28.778Z",
+   "count": 100,
+   "lastAdded": 100,
+   "lastRefreshed": 2
+  },
+  "r-norway": {
+   "name": "r/norway",
+   "type": "reddit",
+   "lastRun": "2026-09-05T10:12:28.778Z",
+   "ok": true,
+   "lastOk": "2026-09-05T10:12:28.778Z",
+   "count": 100,
+   "lastAdded": 100,
+   "lastRefreshed": 0
+  },
+  "kvinneguiden": {
+   "name": "Kvinneguiden forum",
+   "type": "invision",
+   "lastRun": "2026-09-05T10:12:28.778Z",
+   "ok": true,
+   "lastOk": "2026-09-05T10:12:28.778Z",
+   "count": 16,
+   "lastAdded": 16,
+   "lastRefreshed": 16
+  },
+  "vg": {
+   "name": "VG",
+   "type": "rss",
+   "lastRun": "2026-09-05T10:12:28.778Z",
+   "ok": true,
+   "lastOk": "2026-09-05T10:12:28.778Z",
+   "count": 100,
+   "lastAdded": 100,
+   "lastRefreshed": 0
+  },
+  "nettavisen": {
+   "name": "Nettavisen",
+   "type": "rss",
+   "lastRun": "2026-09-05T10:12:28.778Z",
+   "ok": true,
+   "lastOk": "2026-09-05T10:12:28.778Z",
+   "count": 15,
+   "lastAdded": 15,
+   "lastRefreshed": 0
+  }
+ },
+ "generated": "2026-09-05T10:12:28.778Z"
+}
