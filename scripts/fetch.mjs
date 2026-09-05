@@ -187,7 +187,7 @@ const reddit = {
   blocked: false,
   commentBudget: LIMITS.redditCommentBudget,
   // Samlet tidsbudsjett for Reddit per kjøring, så jobben aldri drar ut.
-  deadline: Date.now() + Number(process.env.REDDIT_MAX_MS || 8 * 60000),
+  deadline: Date.now() + Number(process.env.REDDIT_MAX_MS || 9 * 60000),
 };
 // Valgfritt: med REDDIT_CLIENT_ID/REDDIT_CLIENT_SECRET (Reddit-app av typen «script») brukes
 // Reddits offisielle API, som gir hele kommentartreet og langt høyere kvote.
@@ -226,6 +226,7 @@ async function redditGet(url, { soft403 = false, oauth = false } = {}) {
     }
     const res = await fetchText(url, { headers });
     if (res.status === 429 && attempt === 0) {
+      if (Date.now() + 65000 > reddit.deadline) throw new Error('Reddit: tidsbudsjettet for denne kjøringen er brukt opp');
       log('Reddit 429 – venter 65 s og prøver igjen');
       await sleep(65000);
       continue;
@@ -789,9 +790,17 @@ const dayKey = (isoStr) => isoStr.slice(0, 10);
 async function main() {
   const cfg = JSON.parse(await fs.readFile(path.join(ROOT, 'sources.json'), 'utf8'));
   const only = process.env.ONLY ? new Set(process.env.ONLY.split(',')) : null; // til lokal testing
-  const sources = cfg.sources.filter((s) => s.enabled !== false && (!only || only.has(s.id)));
+  const configured = cfg.sources.filter((s) => s.enabled !== false && (!only || only.has(s.id)));
   const existing = await loadExisting();
   const statusFile = await loadStatus();
+  // Reddit har stram kvote og eget tidsbudsjett. Hent de andre kildene først, og Reddit-kildene
+  // i rekkefølge etter hvem som ble hentet for lengst siden, så ingen blir hengende etter
+  // dersom budsjettet tar slutt.
+  const lastOkOf = (s) => new Date(statusFile.sources[s.id]?.lastOk || 0).getTime();
+  const sources = [
+    ...configured.filter((s) => s.type !== 'reddit'),
+    ...configured.filter((s) => s.type === 'reddit').sort((a, b) => lastOkOf(a) - lastOkOf(b)),
+  ];
   log(`Har ${existing.size} innlegg fra før. Kilder: ${sources.map((s) => s.id).join(', ')}`);
 
   const cutoff = new Date(now - RETENTION_DAYS * 86400e3);
@@ -823,8 +832,15 @@ async function main() {
       st.ok = true; st.lastOk = iso(); st.count = mine.length; st.lastAdded = added; st.lastRefreshed = refreshed;
       log(`${src.id}: ${result.items.length} hentet, ${added} nye, ${refreshed} tråder oppdatert${st.warn ? ' – ' + st.warn : ''}`);
     } catch (e) {
-      st.ok = false; st.error = String(e.message || e).slice(0, 300);
-      log(`${src.id}: FEIL ${st.error}`);
+      const msg = String(e.message || e).slice(0, 300);
+      if (/tidsbudsjett|429/.test(msg) && st.lastOk) {
+        // Ikke en feil i kilden – vi rakk bare ikke rundt denne gangen. Forrige innhold beholdes.
+        st.warn = `Ikke hentet denne runden (${msg})`;
+        log(`${src.id}: utsatt – ${msg}`);
+      } else {
+        st.ok = false; st.error = msg;
+        log(`${src.id}: FEIL ${st.error}`);
+      }
     }
     statusFile.sources[src.id] = st;
   }
