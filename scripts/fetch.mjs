@@ -184,19 +184,48 @@ const reddit = {
   // Samlet tidsbudsjett for Reddit per kjøring, så jobben aldri drar ut.
   deadline: Date.now() + Number(process.env.REDDIT_MAX_MS || 7 * 60000),
 };
-async function redditGet(url) {
+// Valgfritt: med REDDIT_CLIENT_ID/REDDIT_CLIENT_SECRET (Reddit-app av typen «script») brukes
+// Reddits offisielle API, som gir hele kommentartreet og langt høyere kvote.
+const REDDIT_OAUTH = process.env.REDDIT_CLIENT_ID && process.env.REDDIT_CLIENT_SECRET
+  ? { id: process.env.REDDIT_CLIENT_ID, secret: process.env.REDDIT_CLIENT_SECRET, token: null }
+  : null;
+if (REDDIT_OAUTH) LIMITS.redditDelayMs = 1200;
+
+async function redditToken() {
+  if (REDDIT_OAUTH.token) return REDDIT_OAUTH.token;
+  const basic = Buffer.from(`${REDDIT_OAUTH.id}:${REDDIT_OAUTH.secret}`).toString('base64');
+  const res = await fetchText('https://www.reddit.com/api/v1/access_token', {
+    method: 'POST',
+    headers: { Authorization: `Basic ${basic}`, 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'bedeem-reader/1.0 (github.com/janeriksandberg/bedeem)' },
+    body: 'grant_type=client_credentials',
+  });
+  if (res.status !== 200) throw new Error(`Reddit OAuth HTTP ${res.status}: ${res.text.slice(0, 120)}`);
+  const j = JSON.parse(res.text);
+  if (!j.access_token) throw new Error('Reddit OAuth: fikk ikke token');
+  REDDIT_OAUTH.token = j.access_token;
+  return j.access_token;
+}
+
+async function redditGet(url, { soft403 = false, oauth = false } = {}) {
   if (reddit.blocked) throw new Error('Reddit har svart 429/403 tidligere i denne kjøringen');
   if (Date.now() > reddit.deadline) throw new Error('Reddit: tidsbudsjettet for denne kjøringen er brukt opp');
   for (let attempt = 0; attempt < 2; attempt++) {
     const wait = reddit.lastRequest + LIMITS.redditDelayMs - Date.now();
     if (wait > 0) await sleep(wait);
     reddit.lastRequest = Date.now();
-    const res = await fetchText(url, { headers: { Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' } });
+    const headers = { Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' };
+    if (oauth) {
+      headers.Authorization = `bearer ${await redditToken()}`;
+      headers['User-Agent'] = 'bedeem-reader/1.0 (github.com/janeriksandberg/bedeem)';
+      headers.Accept = 'application/json';
+    }
+    const res = await fetchText(url, { headers });
     if (res.status === 429 && attempt === 0) {
       log('Reddit 429 – venter 65 s og prøver igjen');
       await sleep(65000);
       continue;
     }
+    if (res.status === 403 && soft403) throw new Error('Reddit HTTP 403');
     if (res.status === 429 || res.status === 403) {
       reddit.blocked = true;
       throw new Error(`Reddit HTTP ${res.status}`);
@@ -205,6 +234,67 @@ async function redditGet(url) {
     return res.text;
   }
   throw new Error('Reddit: ga opp');
+}
+
+// Kommentartre fra det offisielle API-et (krever OAuth).
+function parseRedditJsonComments(json) {
+  const out = [];
+  const walk = (children, depth) => {
+    for (const ch of children || []) {
+      if (ch.kind !== 't1') continue;
+      const d = ch.data;
+      out.push({
+        id: `t1_${d.id}`,
+        author: d.author || '[slettet]',
+        time: iso(new Date((d.created_utc || 0) * 1000)),
+        body: truncate(decodeEntities(d.body || '[fjernet]').trim(), LIMITS.commentChars),
+        depth,
+        score: Number(d.score || 0),
+      });
+      if (d.replies && d.replies.data) walk(d.replies.data.children, depth + 1);
+    }
+  };
+  walk(json?.[1]?.data?.children, 0);
+  return out;
+}
+
+// Reserveløsning: kommentar-RSS gir svarene flatt (uten trådstruktur).
+function parseRedditRssComments(xml) {
+  const out = [];
+  for (const b of splitBlocks(xml, 'entry')) {
+    const id = tagText(b, 'id');
+    if (!id.startsWith('t1_')) continue;
+    out.push({
+      id,
+      author: htmlToText(tagText(tagText(b, 'author'), 'name')).replace(/^\/u\//, '') || '[slettet]',
+      time: iso(parseDate(tagText(b, 'updated') || tagText(b, 'published'))),
+      body: truncate(htmlToText(tagText(b, 'content')) || '[fjernet]', LIMITS.commentChars),
+      depth: 0,
+      score: 0,
+    });
+  }
+  return out;
+}
+
+// Prøver i rekkefølge: offisielt API (om konfigurert) → shreddit-HTML (tråd) → RSS (flatt).
+async function fetchRedditThread(sub, t3) {
+  const id36 = t3.replace(/^t3_/, '');
+  if (REDDIT_OAUTH) {
+    const text = await redditGet(`https://oauth.reddit.com/comments/${id36}?sort=top&limit=100&depth=${LIMITS.commentDepth + 1}&raw_json=1`, { oauth: true });
+    return { comments: parseRedditJsonComments(JSON.parse(text)), flat: false };
+  }
+  if (!reddit.svcBlocked) {
+    try {
+      const html = await redditGet(`https://www.reddit.com/svc/shreddit/comments/r/${sub}/${t3}?sort=top`, { soft403: true });
+      return { comments: parseShredditComments(html), flat: false };
+    } catch (e) {
+      if (!/403/.test(e.message)) throw e;
+      reddit.svcBlocked = true;
+      log('Reddit: tråd-endepunktet er blokkert herfra, bruker RSS (flatt)');
+    }
+  }
+  const xml = await redditGet(`https://www.reddit.com/r/${sub}/comments/${id36}/.rss?sort=top&limit=100`);
+  return { comments: parseRedditRssComments(xml), flat: true };
 }
 
 async function fetchReddit(src, existing) {
@@ -358,11 +448,12 @@ async function refreshRedditComments(sources, all, statusFile) {
   const done = {};
   for (const it of picks) {
     try {
-      const html = await redditGet(`https://www.reddit.com/svc/shreddit/comments/r/${it._redditSub}/${it._t3}?sort=top`);
-      const list = parseShredditComments(html);
+      const { comments: list, flat } = await fetchRedditThread(it._redditSub, it._t3);
       it.comments = pruneThread(list);
-      it.commentCount = list.length;
+      it.commentCount = Math.max(list.length, it.commentCount || 0);
       it.commentsAt = iso();
+      if (flat) it.commentsNote = 'Svar vist i tidsrekkefølge (uten trådstruktur)';
+      else delete it.commentsNote;
       done[it.source] = (done[it.source] || 0) + 1;
     } catch (e) {
       const st = statusFile.sources[it.source];

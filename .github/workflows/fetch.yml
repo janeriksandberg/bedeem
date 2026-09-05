@@ -30,6 +30,10 @@ jobs:
           node-version: 22
 
       - name: Hent fra kildene
+        env:
+          # Valgfritt: gir fulle Reddit-tråder. Se README.
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
         run: node scripts/fetch.mjs
 
       - name: Commit og push data
