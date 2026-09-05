@@ -64,6 +64,8 @@
 
   // ---------- Hjelpere ----------
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // Bare http(s)-lenker slipper gjennom til href; alt annet fra kildene forkastes.
+  const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
   const URL_RE = /(https?:\/\/[^\s<>"'()\[\]]+[^\s<>"'()\[\].,;:!?])/g;
   function linkify(text) {
     return esc(text).replace(URL_RE, (u) => `<a href="${u}" target="_blank" rel="noopener noreferrer">${shortUrl(u)}</a>`);
@@ -405,9 +407,11 @@
     if (it.updated && it.updated !== it.time && !it.ended) meta.push(`<span>oppdatert ${fmtTime(it.updated)}</span>`);
 
     const hasBody = it.body && it.body.trim();
+    const url = safeUrl(it.url);
+    const ext = safeUrl(it.externalUrl);
     const actions = [];
-    actions.push(`<a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">Åpne kilde ↗</a>`);
-    if (it.externalUrl) actions.push(`<a href="${esc(it.externalUrl)}" target="_blank" rel="noopener noreferrer">${esc(shortUrl(it.externalUrl))} ↗</a>`);
+    if (url) actions.push(`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Åpne kilde ↗</a>`);
+    if (ext) actions.push(`<a href="${esc(ext)}" target="_blank" rel="noopener noreferrer">${esc(shortUrl(ext))} ↗</a>`);
     const nc = it.commentCount ?? (it.comments ? it.comments.length : 0);
     if (it.comments && it.comments.length) {
       actions.push(`<button type="button" class="thr" aria-expanded="false">${nc} svar</button>`);
@@ -417,7 +421,7 @@
 
     art.innerHTML = `
       <div class="meta">${meta.join('')}</div>
-      <h2 class="title"><a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">${esc(it.title)}</a></h2>
+      <h2 class="title">${url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(it.title)}</a>` : esc(it.title)}</h2>
       ${hasBody ? `<div class="body clamp">${paragraphs(it.body)}</div>` : ''}
       <div class="actions">${actions.join('')}</div>`;
 
@@ -553,7 +557,11 @@
           <label>Maks kort per 100 innlegg <input type="number" id="bookMax" min="0" max="100" step="1" inputmode="numeric" value="${settings.bookMax}"></label>
           <label>Minst kort per 100 innlegg <input type="number" id="bookMin" min="0" max="100" step="1" inputmode="numeric" value="${settings.bookMin}"></label>
         </div>` : '';
-      return `<h3>${esc(g)}</h3>${extra}<ul>${rows.join('')}</ul>`;
+      const grpBtns = `<span class="grp">
+        <button type="button" data-grp-none="${esc(g)}" title="Velg bort alle i ${esc(g)}" aria-label="Velg bort alle i ${esc(g)}">☐</button>
+        <button type="button" data-grp-all="${esc(g)}" title="Velg alle i ${esc(g)}" aria-label="Velg alle i ${esc(g)}">☑</button>
+      </span>`;
+      return `<h3><span>${esc(g)}</span>${grpBtns}</h3>${extra}<ul>${rows.join('')}</ul>`;
     });
     const rl = rareLimit();
     const rareLabel = settings.rareStep === 0 ? 'færre enn 1' : rl === Infinity ? 'flere enn 100' : `færre enn ${rl}`;
@@ -623,6 +631,20 @@
       renderReset();
     });
     const snap = () => { if (!hiddenSnapshot) hiddenSnapshot = settings.hidden.slice(); };
+    const groupIds = (g) => state.sources.filter((s) => (s.group || 'Andre') === g).map((s) => s.id);
+    panelEl.querySelectorAll('button[data-grp-none]').forEach((b) => b.addEventListener('click', () => {
+      snap();
+      const scroll = panelEl.scrollTop;
+      setHidden([...settings.hidden, ...groupIds(b.dataset.grpNone)]);
+      panelEl.scrollTop = scroll;
+    }));
+    panelEl.querySelectorAll('button[data-grp-all]').forEach((b) => b.addEventListener('click', () => {
+      snap();
+      const ids = new Set(groupIds(b.dataset.grpAll));
+      const scroll = panelEl.scrollTop;
+      setHidden(settings.hidden.filter((x) => !ids.has(x)));
+      panelEl.scrollTop = scroll;
+    }));
     $('#selNone').addEventListener('click', () => { snap(); setHidden(state.sources.map((s) => s.id)); });
     $('#selAll').addEventListener('click', () => { snap(); setHidden([]); });
     $('#selReset').addEventListener('click', () => { if (hiddenSnapshot) { const s = hiddenSnapshot; hiddenSnapshot = null; setHidden(s); } });
@@ -687,7 +709,7 @@
     const from = $('#contactEmail').value.trim();
     const msg = $('#contactMsg').value.trim();
     if (!msg) { $('#contactMsg').focus(); return; }
-    const body = `Fra: ${from || '(ikke oppgitt)'}\nEnhet: ${settings.device}\n\n${msg}`;
+    const body = `Fra: ${from || '(ikke oppgitt)'}\n\n${msg}`;
     window.location.href = `mailto:${contactAddress()}?subject=${encodeURIComponent('Bedeem: forslag/kommentar')}&body=${encodeURIComponent(body)}`;
     $('#contactNote').textContent = 'E-postprogrammet ditt skal nå ha åpnet seg med meldingen klar til sending.';
   });

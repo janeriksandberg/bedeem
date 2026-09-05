@@ -16,9 +16,9 @@ const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 // Grenser som holder datamengden nede (alt lastes ned til mobil).
 const LIMITS = {
   bodyChars: 6000,
-  commentChars: 900,
-  commentsPerItem: 25,
-  commentDepth: 5,
+  commentChars: 800,
+  commentsPerItem: 75,   // minst de siste/beste 75 svarene der kilden gir så mange
+  commentDepth: 6,
   redditCommentBudget: Number(process.env.REDDIT_COMMENT_BUDGET || 10),
   redditDelayMs: 10000,
   invisionTopicBudget: Number(process.env.INVISION_TOPIC_BUDGET || 20),
@@ -187,7 +187,7 @@ const reddit = {
   blocked: false,
   commentBudget: LIMITS.redditCommentBudget,
   // Samlet tidsbudsjett for Reddit per kjøring, så jobben aldri drar ut.
-  deadline: Date.now() + Number(process.env.REDDIT_MAX_MS || 7 * 60000),
+  deadline: Date.now() + Number(process.env.REDDIT_MAX_MS || 8 * 60000),
 };
 // Valgfritt: med REDDIT_CLIENT_ID/REDDIT_CLIENT_SECRET (Reddit-app av typen «script») brukes
 // Reddits offisielle API, som gir hele kommentartreet og langt høyere kvote.
@@ -542,16 +542,17 @@ async function refreshInvisionTopics(items, status) {
   for (const it of candidates) {
     try {
       await sleep(LIMITS.invisionDelayMs);
-      // getLastComment sender oss til siden med de nyeste svarene.
-      const { text, status: st } = await fetchText(it.url + '?do=getLastComment');
-      if (st !== 200) throw new Error(`HTTP ${st}`);
-      const ld = parseLdJson(text).find((j) => j && j['@type'] === 'DiscussionForumPosting');
+      // getLastComment sender oss til siden med de nyeste svarene. Trenger vi flere for å
+      // nå commentsPerItem, henter vi sidene før i tillegg (hver side har ca. 25 svar).
+      const first = await fetchText(it.url + '?do=getLastComment');
+      if (first.status !== 200) throw new Error(`HTTP ${first.status}`);
+      const ld = parseLdJson(first.text).find((j) => j && j['@type'] === 'DiscussionForumPosting');
       if (!ld) throw new Error('Fant ikke JSON-LD på emnesiden');
       const created = parseDate(ld.dateCreated || ld.datePublished);
       if (created) it.created = iso(created);
       if (ld.author?.name) it.author = ld.author.name;
       if (ld.text) it.body = truncate(cleanInvisionText(ld.text), LIMITS.bodyChars);
-      const comments = (ld.comment || []).map((c) => ({
+      const toComments = (arr) => (arr || []).map((c) => ({
         id: (c['@id'] || '').split('#')[1] || undefined,
         author: c.author?.name || 'Anonym',
         time: iso(parseDate(c.dateCreated)),
@@ -559,10 +560,25 @@ async function refreshInvisionTopics(items, status) {
         depth: 0,
         score: c.upvoteCount || 0,
       }));
+      let comments = toComments(ld.comment);
+      const pageEnd = Number(ld.pageEnd) || 1;
+      let page = Number((first.url.match(/\/page\/(\d+)\//) || [])[1]) || pageEnd;
+      let firstPage = page;
+      while (comments.length < LIMITS.commentsPerItem && firstPage > 1) {
+        firstPage--;
+        await sleep(LIMITS.invisionDelayMs);
+        const prev = await fetchText(`${it.url}page/${firstPage}/`);
+        if (prev.status !== 200) break;
+        const pld = parseLdJson(prev.text).find((j) => j && j['@type'] === 'DiscussionForumPosting');
+        if (!pld) break;
+        comments = [...toComments(pld.comment), ...comments];
+      }
+      const seenIds = new Set();
+      comments = comments.filter((c) => (c.id && seenIds.has(c.id) ? false : (seenIds.add(c.id), true)));
       it.comments = comments.slice(-LIMITS.commentsPerItem);
       const cc = (ld.interactionStatistic || []).find((s) => /CommentAction/.test(s.interactionType));
       if (cc) it.commentCount = cc.userInteractionCount;
-      if (ld.pageEnd > 1) it.commentsNote = `Nyeste svar (side ${ld.pageStart || ld.pageEnd} av ${ld.pageEnd})`;
+      if (pageEnd > 1) it.commentsNote = `Nyeste svar (side ${firstPage === page ? page : firstPage + '–' + page} av ${pageEnd})`;
       else delete it.commentsNote;
       it.topicFetched = true;
       it.commentsAt = iso();

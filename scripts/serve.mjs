@@ -34,4 +34,4 @@ http.createServer(async (req, res) => {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('404');
   }
-}).listen(PORT, () => console.log(`http://localhost:${PORT}/`));
+}).listen(PORT, '127.0.0.1', () => console.log(`http://localhost:${PORT}/`));

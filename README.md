@@ -40,9 +40,9 @@ appen) og `group` (gruppering i Kilder-panelet). Sett `"enabled": false` for å
 skru en kilde av uten å slette den. For RSS begrenser `maxItems` (standard 200)
 hvor mange poster som beholdes fra feeder med mye historikk.
 
-Kilder som ikke kan hentes automatisk: forumet på freak.no (Cloudflare-sperre
-mot roboter) og Citrix' sikkerhetsbulletiner (siden bygges med JavaScript og har
-ingen feed).
+Kilder som ikke kan hentes automatisk: forumet på freak.no (Cloudflare «managed
+challenge» som krever ekte nettleser, også for RSS-adressen) og Citrix'
+sikkerhetsbulletiner (siden bygges med JavaScript og har ingen feed).
 
 ## Vekting av sjeldne kilder
 
@@ -56,6 +56,23 @@ hundre ikke i det hele tatt. Justeres med konstantene øverst i `app.js`. Hjerte
 uten hjerte likevel går foran en hyppig kilde med hjerte. Slideren i
 Kilder-panelet setter grensen for «veldig sjelden» (fra færre enn 1 til flere enn
 100 per uke); innlegg fra slike kilder får rød ramme.
+
+## Sikkerhet og personvern
+
+- Alt innhold fra kildene settes inn som tekst (HTML-escapet) og bare `http(s)`-lenker
+  slipper gjennom til `href`. Eksterne lenker åpnes med `rel="noopener noreferrer"`,
+  og siden sender ingen referrer (`<meta name="referrer" content="no-referrer">`).
+- `Content-Security-Policy` i `index.html` tillater bare skript og tilkoblinger fra eget
+  domene. Det finnes ingen inline-skript.
+- Siden er merket `noindex, nofollow` for å holde den ute av søkemotorer.
+- Ingen pålogging, ingen sporing, ingen tredjepartsressurser. Innstillinger ligger kun i
+  nettleserens `localStorage`.
+- Kontaktskjemaet bruker brukerens eget e-postprogram; mottakeradressen ligger ikke i
+  klartekst i koden.
+- Innhentingen kjører med minste nødvendige rettigheter (`contents: write` for data,
+  `actions: write` for å starte neste kjøring). Eneste hemmeligheter er de valgfrie
+  Reddit-nøklene.
+- Merk at repoet er offentlig: commit-historikk, kildeliste og `data/` er synlig for alle.
 
 ## Bok-påminnelser
 
