@@ -3,9 +3,9 @@
   "vy-sande": {
    "name": "Vy · tog Sande–Oslo",
    "type": "entur",
-   "lastRun": "2026-09-05T10:12:28.778Z",
+   "lastRun": "2026-09-05T11:40:12.453Z",
    "ok": true,
-   "lastOk": "2026-09-05T10:12:28.778Z",
+   "lastOk": "2026-09-05T11:40:12.453Z",
    "count": 0,
    "lastAdded": 0,
    "lastRefreshed": 0
@@ -13,73 +13,74 @@
   "r-norge": {
    "name": "r/norge",
    "type": "reddit",
-   "lastRun": "2026-09-05T10:12:28.778Z",
+   "lastRun": "2026-09-05T11:40:12.453Z",
    "ok": true,
-   "lastOk": "2026-09-05T10:12:28.778Z",
-   "count": 100,
-   "lastAdded": 100,
-   "lastRefreshed": 4
+   "lastOk": "2026-09-05T11:40:12.453Z",
+   "count": 103,
+   "lastAdded": 3,
+   "lastRefreshed": 0,
+   "warn": "Kommentarer: Reddit HTTP 403"
   },
   "r-norske": {
    "name": "r/norske",
    "type": "reddit",
-   "lastRun": "2026-09-05T10:12:28.778Z",
+   "lastRun": "2026-09-05T11:40:12.453Z",
    "ok": true,
-   "lastOk": "2026-09-05T10:12:28.778Z",
+   "lastOk": "2026-09-05T11:40:12.453Z",
    "count": 100,
-   "lastAdded": 100,
-   "lastRefreshed": 4
+   "lastAdded": 0,
+   "lastRefreshed": 0
   },
   "r-aita": {
    "name": "r/AmItheAsshole",
    "type": "reddit",
-   "lastRun": "2026-09-05T10:12:28.778Z",
+   "lastRun": "2026-09-05T11:40:12.453Z",
    "ok": true,
-   "lastOk": "2026-09-05T10:12:28.778Z",
-   "count": 100,
-   "lastAdded": 100,
-   "lastRefreshed": 2
+   "lastOk": "2026-09-05T11:40:12.453Z",
+   "count": 110,
+   "lastAdded": 11,
+   "lastRefreshed": 0
   },
   "r-norway": {
    "name": "r/norway",
    "type": "reddit",
-   "lastRun": "2026-09-05T10:12:28.778Z",
+   "lastRun": "2026-09-05T11:40:12.453Z",
    "ok": true,
-   "lastOk": "2026-09-05T10:12:28.778Z",
-   "count": 100,
-   "lastAdded": 100,
+   "lastOk": "2026-09-05T11:40:12.453Z",
+   "count": 102,
+   "lastAdded": 2,
    "lastRefreshed": 0
   },
   "kvinneguiden": {
    "name": "Kvinneguiden forum",
    "type": "invision",
-   "lastRun": "2026-09-05T10:12:28.778Z",
+   "lastRun": "2026-09-05T11:40:12.453Z",
    "ok": true,
-   "lastOk": "2026-09-05T10:12:28.778Z",
-   "count": 16,
+   "lastOk": "2026-09-05T11:40:12.453Z",
+   "count": 32,
    "lastAdded": 16,
    "lastRefreshed": 16
   },
   "vg": {
    "name": "VG",
    "type": "rss",
-   "lastRun": "2026-09-05T10:12:28.778Z",
+   "lastRun": "2026-09-05T11:40:12.453Z",
    "ok": true,
-   "lastOk": "2026-09-05T10:12:28.778Z",
-   "count": 100,
-   "lastAdded": 100,
+   "lastOk": "2026-09-05T11:40:12.453Z",
+   "count": 106,
+   "lastAdded": 6,
    "lastRefreshed": 0
   },
   "nettavisen": {
    "name": "Nettavisen",
    "type": "rss",
-   "lastRun": "2026-09-05T10:12:28.778Z",
+   "lastRun": "2026-09-05T11:40:12.453Z",
    "ok": true,
-   "lastOk": "2026-09-05T10:12:28.778Z",
-   "count": 15,
-   "lastAdded": 15,
+   "lastOk": "2026-09-05T11:40:12.453Z",
+   "count": 27,
+   "lastAdded": 12,
    "lastRefreshed": 0
   }
  },
- "generated": "2026-09-05T10:12:28.778Z"
+ "generated": "2026-09-05T11:40:12.453Z"
 }
