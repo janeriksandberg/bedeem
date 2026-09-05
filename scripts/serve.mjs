@@ -12,6 +12,17 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 
 http.createServer(async (req, res) => {
   try {
+    // Kun for lokal utvikling: POST /__save?name=fil.png lagrer kroppen i prosjektroten
+    // (brukes til å rendre ikon-PNG-er fra nettleseren).
+    if (req.method === 'POST' && req.url.startsWith('/__save')) {
+      const name = new URL(req.url, 'http://x').searchParams.get('name') || '';
+      if (!/^[a-z0-9-]+\.(png|jpg|webp)$/.test(name)) { res.writeHead(400); return res.end('ugyldig navn'); }
+      const chunks = [];
+      for await (const c of req) chunks.push(c);
+      await fs.writeFile(path.join(ROOT, name), Buffer.concat(chunks));
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      return res.end(`lagret ${name} (${Buffer.concat(chunks).length} byte)`);
+    }
     let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (p.endsWith('/')) p += 'index.html';
     const file = path.join(ROOT, p);

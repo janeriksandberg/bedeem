@@ -1,4 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="24" fill="#0b5cad"/>
-  <text x="64" y="90" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="80" font-weight="800" fill="#ffffff">B</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Bedeem: en lesestrøm som alltid er med. Tre tekstlinjer, den viktigste i rosa. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d4ed8"/>
+      <stop offset="1" stop-color="#0b2a5e"/>
+    </linearGradient>
+    <linearGradient id="pink" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff6b9d"/>
+      <stop offset="1" stop-color="#e0407f"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- svak «skjerm» bak linjene -->
+  <rect x="88" y="120" width="336" height="272" rx="40" fill="#ffffff" opacity="0.08"/>
+  <!-- tre linjer: overskrift (rosa) + to tekstlinjer -->
+  <circle cx="144" cy="184" r="24" fill="url(#pink)"/>
+  <rect x="192" y="164" width="200" height="40" rx="20" fill="url(#pink)"/>
+  <rect x="120" y="240" width="272" height="34" rx="17" fill="#ffffff" opacity="0.95"/>
+  <rect x="120" y="308" width="196" height="34" rx="17" fill="#ffffff" opacity="0.7"/>
+  <!-- liten «offline»-prikk nede til høyre: alltid tilgjengelig -->
+  <circle cx="372" cy="325" r="17" fill="#ffffff" opacity="0.7"/>
 </svg>

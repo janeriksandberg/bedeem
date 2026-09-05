@@ -16,6 +16,8 @@
   --warn: #b26a00;
   --err: #c62828;
   --thread: #c8c2b5;
+  --pink: #d6336c;
+  --pink-soft: #fbe3ec;
   --max: 44rem;
   color-scheme: light dark;
 }
@@ -36,6 +38,8 @@
     --warn: #ffb74d;
     --err: #ef5350;
     --thread: #3c3c44;
+    --pink: #ff6b9d;
+    --pink-soft: #3a2230;
   }
 }
 
@@ -66,8 +70,10 @@ button { font: inherit; }
 }
 .row { max-width: var(--max); margin: 0 auto; padding: 6px 10px; display: flex; align-items: center; gap: 8px; }
 .row1 { padding-bottom: 0; justify-content: space-between; }
-.brand { font-weight: 800; font-size: 19px; letter-spacing: .02em; color: var(--fg); text-decoration: none; }
-.status { color: var(--muted); font-size: 13px; text-align: right; }
+.brand { font-weight: 800; font-size: 19px; letter-spacing: .02em; color: var(--fg); text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+.brand::before { content: ""; width: 20px; height: 20px; border-radius: 6px; background: url("icon.svg") center/cover no-repeat; flex: none; }
+.brand::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--pink); margin-left: -3px; align-self: flex-end; margin-bottom: 4px; }
+.status { color: var(--muted); font-size: 13px; text-align: right; flex: 1 1 auto; min-width: 0; line-height: 1.25; }
 .status.offline { color: var(--warn); font-weight: 600; }
 .row2 { justify-content: space-between; flex-wrap: nowrap; }
 .group { display: flex; gap: 6px; }
@@ -169,7 +175,8 @@ button { font: inherit; }
   padding: .8rem .9rem;
   margin: .6rem 0;
 }
-.post.book .tag { background: var(--accent); color: var(--accent-fg); }
+.post.book { border-color: var(--pink-soft); box-shadow: inset 4px 0 0 var(--pink); }
+.post.book .tag { background: var(--pink); color: #fff; }
 .post.book .title { font-size: 1.05rem; }
 .post.rare {
   border: 2px solid var(--err);
@@ -178,7 +185,7 @@ button { font: inherit; }
   margin: .5rem 0;
 }
 .rare-mark { color: var(--err); font-weight: 700; text-transform: uppercase; font-size: .7rem; letter-spacing: .05em; }
-.heart-mark { color: var(--err); }
+.heart-mark { color: var(--pink); }
 .heart {
   flex: none;
   min-width: 44px; min-height: 44px;
@@ -187,7 +194,7 @@ button { font: inherit; }
   font-size: 24px;
   cursor: pointer;
 }
-.heart.on { color: var(--err); }
+.heart.on { color: var(--pink); }
 .poop {
   flex: none;
   min-width: 44px; min-height: 44px;
@@ -198,7 +205,8 @@ button { font: inherit; }
   opacity: .45;
 }
 .poop.on { filter: none; opacity: 1; }
-.brandrow { display: flex; align-items: baseline; gap: 12px; }
+.brandrow { display: flex; align-items: center; gap: 10px; flex: none; white-space: nowrap; }
+.brand { white-space: nowrap; }
 .linkbtn { border: 0; background: none; color: var(--accent); font-size: 15px; font-weight: 600; cursor: pointer; padding: 6px 4px; min-height: 32px; }
 .linkbtn.active { text-decoration: underline; }
 .about p { margin: 0 0 .8rem; }
@@ -216,9 +224,10 @@ button { font: inherit; }
 .panel li.rare-row .tag { box-shadow: inset 0 0 0 2px var(--err); }
 .rarebox { margin: .4rem 0 .6rem; padding: .6rem .8rem; border: 1px solid var(--line); border-radius: 10px; }
 .rarebox label { display: block; font-size: .95rem; }
-.rarebox input[type=range] { width: 100%; margin: .5rem 0 .2rem; height: 32px; accent-color: var(--err); }
+.rarebox input[type=range] { width: 100%; margin: .5rem 0 .2rem; height: 32px; accent-color: var(--pink); }
+.panel h3 { color: var(--pink); }
 .rarebox .small { margin-top: .2rem; }
-.post.unread .title::before { content: "●"; color: var(--accent); font-size: .55em; vertical-align: middle; margin-right: .35em; }
+.post.unread .title::before { content: "●"; color: var(--pink); font-size: .55em; vertical-align: middle; margin-right: .35em; }
 .meta {
   display: flex;
   flex-wrap: wrap;
