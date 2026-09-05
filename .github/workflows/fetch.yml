@@ -1,5 +1,8 @@
 name: Hent innhold
 
+# Kjøres hvert 10. minutt. GitHubs cron-tidsplan er upålitelig (kan bli forsinket i timer),
+# så hver kjøring starter i tillegg den neste selv via workflow_dispatch når den er ferdig.
+# Tidsplanen står igjen som reserve hvis kjeden skulle brytes.
 on:
   schedule:
     - cron: "*/10 * * * *"
@@ -13,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: hent-innhold
@@ -21,8 +25,11 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
+      - name: Noter starttid
+        run: echo "START=$(date +%s)" >> "$GITHUB_ENV"
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -51,3 +58,25 @@ jobs:
             sleep 5
           done
           exit 1
+
+      - name: Vent til neste runde og start neste kjøring
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          elapsed=$(( $(date +%s) - START ))
+          wait=$(( 600 - elapsed ))
+          if [ "$wait" -gt 0 ]; then
+            echo "Venter $wait s så det blir ca. 10 minutter mellom kjøringene."
+            sleep "$wait"
+          fi
+          # Start bare neste kjøring hvis ingen annen allerede venter eller kjører (unngår doble kjeder).
+          others=$(gh run list --workflow fetch.yml --status queued --json databaseId --jq length)
+          running=$(gh run list --workflow fetch.yml --status in_progress --json databaseId --jq length)
+          echo "I kø: $others, kjører: $running (inkludert denne)"
+          if [ "$others" -eq 0 ] && [ "$running" -le 1 ]; then
+            gh workflow run fetch.yml --ref main
+            echo "Neste kjøring startet."
+          else
+            echo "En annen kjøring tar over kjeden."
+          fi

@@ -6,7 +6,11 @@ for sporadisk nettilgang. Publiseres med GitHub Pages på <https://bedeem.com>.
 ## Slik virker det
 
 - **`scripts/fetch.mjs`** kjøres av GitHub Actions hvert 10. minutt
-  (`.github/workflows/fetch.yml`). Skriptet henter fra kildene i `sources.json`,
+  (`.github/workflows/fetch.yml`). Fordi GitHubs cron-tidsplan ofte er kraftig
+  forsinket, starter hver kjøring den neste selv når den er ferdig; tidsplanen er
+  reserve. Skulle kjeden stoppe (f.eks. etter et GitHub-avbrudd), starter den igjen
+  ved neste cron-kjøring, ved push av skript/kildeliste, eller ved å trykke
+  «Run workflow» under Actions. Skriptet henter fra kildene i `sources.json`,
   normaliserer alt til samme format (tid, tittel, brødtekst, ev. svar i tråd) og
   skriver dagsfiler til `data/days/ÅÅÅÅ-MM-DD.json` samt `data/index.json`.
   Ingen avhengigheter – bare Node 20+.
