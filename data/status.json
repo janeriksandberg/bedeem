@@ -3,254 +3,345 @@
   "vy-sande": {
    "name": "Vy · tog Sande–Oslo",
    "type": "entur",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 0,
    "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "r-norge": {
    "name": "r/norge",
    "type": "reddit",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 109,
-   "lastAdded": 1,
-   "lastRefreshed": 1
+   "lastAdded": 0,
+   "lastRefreshed": 0,
+   "warn": "Kommentarer: Reddit: tidsbudsjettet for denne kjøringen er brukt opp",
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "r-norske": {
    "name": "r/norske",
    "type": "reddit",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 105,
-   "lastAdded": 1,
+   "lastAdded": 0,
    "lastRefreshed": 1,
-   "warn": "Kommentarer: Reddit: tidsbudsjettet for denne kjøringen er brukt opp"
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "r-aita": {
    "name": "r/AmItheAsshole",
    "type": "reddit",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
-   "count": 118,
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 119,
    "lastAdded": 2,
-   "lastRefreshed": 1
+   "lastRefreshed": 1,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "r-norway": {
    "name": "r/norway",
    "type": "reddit",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
-   "count": 103,
-   "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 104,
+   "lastAdded": 1,
+   "lastRefreshed": 1,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "kvinneguiden": {
    "name": "Kvinneguiden forum",
    "type": "invision",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
-   "count": 65,
-   "lastAdded": 10,
-   "lastRefreshed": 10
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 70,
+   "lastAdded": 5,
+   "lastRefreshed": 5,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "vg": {
    "name": "VG",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 114,
-   "lastAdded": 1,
-   "lastRefreshed": 0
+   "lastAdded": 0,
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "nettavisen": {
    "name": "Nettavisen",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
-   "count": 29,
-   "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 31,
+   "lastAdded": 2,
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "filternyheter": {
    "name": "Filter Nyheter",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 10,
    "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "document": {
    "name": "Document.no",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
-   "count": 16,
-   "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 18,
+   "lastAdded": 2,
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "r-all-top": {
    "name": "Reddit topp 100 (siste døgn)",
    "type": "reddit",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
-   "count": 103,
-   "lastAdded": 1,
-   "lastRefreshed": 0
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 109,
+   "lastAdded": 6,
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "ncsc-varsler": {
    "name": "NSM · varsler fra NCSC",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 10,
    "lastAdded": 8,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "nsm": {
    "name": "NSM · nyheter og notater",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 10,
    "lastAdded": 9,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "msrc": {
    "name": "Microsoft MSRC Update Guide",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 199,
    "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "cisco-psirt": {
    "name": "Cisco PSIRT",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 50,
    "lastAdded": 14,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "ivanti": {
    "name": "Ivanti security advisories",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 19,
    "lastAdded": 17,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "cisa-kev": {
    "name": "CISA Known Exploited Vulnerabilities",
    "type": "cisa-kev",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 150,
    "lastAdded": 90,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "cisa-adv": {
    "name": "CISA advisories",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 30,
    "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "ncsc-uk": {
    "name": "NCSC UK",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 20,
    "lastAdded": 7,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "sans-isc": {
    "name": "SANS Internet Storm Center",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 10,
    "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "bleeping": {
    "name": "BleepingComputer",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 15,
    "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "therecord": {
    "name": "The Record",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 5,
    "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "ms-ti": {
    "name": "Microsoft Threat Intelligence",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 10,
    "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "google-ti": {
    "name": "Google Threat Intelligence / Mandiant",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 20,
    "lastAdded": 11,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   },
   "unit42": {
    "name": "Unit 42",
    "type": "rss",
-   "lastRun": "2026-09-05T12:52:18.481Z",
+   "lastRun": "2026-09-05T13:02:28.057Z",
    "ok": true,
-   "lastOk": "2026-09-05T12:52:18.481Z",
+   "lastOk": "2026-09-05T13:02:28.057Z",
    "count": 15,
    "lastAdded": 0,
-   "lastRefreshed": 0
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
+  },
+  "itromso": {
+   "name": "iTromsø",
+   "type": "rss",
+   "lastRun": "2026-09-05T13:02:28.057Z",
+   "ok": true,
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 67,
+   "lastAdded": 67,
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
+  },
+  "sandeavis": {
+   "name": "Sande Avis",
+   "type": "rss",
+   "lastRun": "2026-09-05T13:02:28.057Z",
+   "ok": true,
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 15,
+   "lastAdded": 15,
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
+  },
+  "dt": {
+   "name": "Drammens Tidende",
+   "type": "rss",
+   "lastRun": "2026-09-05T13:02:28.057Z",
+   "ok": true,
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 15,
+   "lastAdded": 15,
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
+  },
+  "politi-oslo": {
+   "name": "Politiloggen · Oslo",
+   "type": "politiloggen",
+   "lastRun": "2026-09-05T13:02:28.057Z",
+   "ok": true,
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 46,
+   "lastAdded": 46,
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
+  },
+  "politi-vestfold": {
+   "name": "Politiloggen · Vestfold",
+   "type": "politiloggen",
+   "lastRun": "2026-09-05T13:02:28.057Z",
+   "ok": true,
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 35,
+   "lastAdded": 35,
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
+  },
+  "politi-tromso": {
+   "name": "Politiloggen · Tromsø",
+   "type": "politiloggen",
+   "lastRun": "2026-09-05T13:02:28.057Z",
+   "ok": true,
+   "lastOk": "2026-09-05T13:02:28.057Z",
+   "count": 63,
+   "lastAdded": 63,
+   "lastRefreshed": 0,
+   "firstSeen": "2026-09-05T13:02:28.057Z"
   }
  },
- "generated": "2026-09-05T12:52:18.481Z"
+ "generated": "2026-09-05T13:02:28.057Z"
 }
