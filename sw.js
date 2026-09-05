@@ -1,8 +1,8 @@
 /* Bedeem service worker – gjør at siden og bufferen virker uten nett.
    - Appfiler: cache først, oppdateres i bakgrunnen.
    - Data (data/…): nett først med tidsavbrudd, ellers cache. */
-const VERSION = 'bedeem-v2';
-const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'sources.json', 'books.json', 'manifest.webmanifest', 'icon.svg'];
+const VERSION = 'bedeem-v3';
+const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'sources.json', 'books.json', 'books-ledelse.json', 'manifest.webmanifest', 'icon.svg'];
 const NET_TIMEOUT = 12000;
 
 self.addEventListener('install', (event) => {

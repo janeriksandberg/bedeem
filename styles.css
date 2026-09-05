@@ -107,16 +107,42 @@ button { font: inherit; }
   font-size: .95rem;
 }
 .banner button { margin-left: 8px; }
+/* Kilder-panelet ligger fast under toppraden, uansett hvor langt ned du har bladd. */
 .panel {
-  max-width: var(--max);
-  margin: 10px auto 0;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  top: 96px; /* justeres av JS til høyden på toppraden */
+  z-index: 9;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--card);
+  border-top: 1px solid var(--line);
   font-size: .95rem;
+  padding-bottom: env(safe-area-inset-bottom);
 }
-.panel h2 { font-size: 1.05rem; margin: 0 0 .5rem; }
+.panel-inner { max-width: var(--max); margin: 0 auto; padding: 10px 14px 24px; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: .3rem; }
+.panel-head .btn { font-size: 20px; padding: 0 10px; }
+.panel-head .btn:disabled { opacity: .4; cursor: default; }
+.panel h2 { font-size: 1.05rem; margin: 0; }
+.bookfreq { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: .2rem 0 .5rem; }
+.bookfreq label { display: flex; align-items: center; gap: 8px; font-size: .9rem; color: var(--muted); }
+.bookfreq input { width: 4.5em; min-height: 40px; font: inherit; font-size: 1rem; text-align: center; border: 1px solid var(--btn-border); border-radius: 8px; background: var(--btn); color: var(--btn-fg); }
+.jump {
+  position: fixed;
+  right: 14px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 8;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  border: 1px solid var(--btn-border);
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 26px;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+  cursor: pointer;
+}
 .panel h3 { font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: .9rem 0 .2rem; }
 .panel ul { list-style: none; margin: 0; padding: 0; }
 .panel li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }

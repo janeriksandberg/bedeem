@@ -1,5 +1,6 @@
 {
-  "_help": "Bok-påminnelser. Hvert kort skal stå seg alene: hva poenget er, hvorfor det virker og hvordan du bruker det i hverdagen. Appen fletter kortene inn tilfeldig mellom innleggene (maks 1 av 10, minst 1 av 30). Legg til en bok ved å legge til et objekt i 'books' med id, title, authors og cards.",
+  "_help": "Bok-påminnelser. Hvert kort skal stå seg alene: hva poenget er, hvorfor det virker og hvordan du bruker det i hverdagen. Appen fletter kortene inn tilfeldig mellom innleggene (frekvens styres i Kilder-panelet). Legg til en bok ved å legge til et objekt i 'books' med id, title, authors og cards, eller pek til flere filer i 'include'.",
+  "include": ["books-ledelse.json"],
   "books": [
     {
       "id": "getting-to-yes",

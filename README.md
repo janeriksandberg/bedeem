@@ -42,11 +42,13 @@ ingen feed).
 
 ## Bok-påminnelser
 
-`books.json` inneholder korte oppsummeringer av poeng og teknikker fra bøker.
-Appen fletter dem inn tilfeldig mellom innleggene: maks ett kort per 10 innlegg,
-minst ett per 30. Kortene kan slås av under «Kilder». Legg til en bok ved å legge
-til et objekt med `id`, `title`, `authors` og en liste `cards` med `title` og
-`body`.
+`books.json` (og filene den peker til i `include`, f.eks. `books-ledelse.json`)
+inneholder korte oppsummeringer av poeng og teknikker fra bøker. Appen fletter
+dem inn tilfeldig mellom innleggene. Frekvensen styres i Kilder-panelet som maks
+og minst antall kort per 100 innlegg (standard 10 og 3). Hver bok kan slås av
+for seg. Er det få vanlige innlegg å vise, fylles resten av kortene på etter dem.
+Legg til en bok ved å legge til et objekt med `id`, `title`, `authors` og en
+liste `cards` med `title` og `body`.
 
 ## Kjøre lokalt
 
