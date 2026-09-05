@@ -844,12 +844,22 @@ async function main() {
   }
   statusFile.generated = iso();
   await fs.writeFile(path.join(DATA_DIR, 'status.json'), JSON.stringify(statusFile, null, 1));
-  // Publiseringsrate per kilde (innlegg siste 7 dager) – brukes av appen til å løfte sjeldne kilder.
+  // Publiseringsrate per kilde – brukes av appen til å løfte sjeldne kilder. Telles over siste
+  // 7 dager, men for kilder vi nettopp har begynt å følge skaleres tallet opp fra den perioden
+  // vi faktisk har observert (minst én dag), så nye kilder ikke feilaktig framstår som sjeldne.
   const weekAgo = new Date(now - 7 * 86400e3);
-  const perWeek = {};
+  const counts = {};
   for (const it of all.values()) {
-    if (new Date(it.time) >= weekAgo) perWeek[it.source] = (perWeek[it.source] || 0) + 1;
+    if (new Date(it.time) >= weekAgo) counts[it.source] = (counts[it.source] || 0) + 1;
   }
+  const perWeek = {};
+  for (const s of sources) {
+    const st = statusFile.sources[s.id] || {};
+    if (!st.firstSeen) { st.firstSeen = iso(); statusFile.sources[s.id] = st; }
+    const observedDays = Math.min(7, Math.max(1, (now - new Date(st.firstSeen)) / 86400e3));
+    perWeek[s.id] = Math.round(((counts[s.id] || 0) / observedDays) * 7 * 10) / 10;
+  }
+  await fs.writeFile(path.join(DATA_DIR, 'status.json'), JSON.stringify(statusFile, null, 1));
   const index = {
     generated: iso(),
     total: days.reduce((n, d) => n + d.count, 0),

@@ -47,7 +47,8 @@ ingen feed).
 ## Vekting av sjeldne kilder
 
 Strømmen er ikke strengt kronologisk. Innhentingen teller hvor mange innlegg hver
-kilde har publisert siste sju dager (`perWeek` i `data/index.json`), og appen
+kilde har publisert siste sju dager (`perWeek` i `data/index.json`; for kilder som
+er fulgt kortere enn en uke skaleres tallet opp fra den observerte perioden), og appen
 løfter innlegg fra kilder som publiserer sjeldnere enn 100 i uka, som om de var
 publisert senere: 4 timer for hver halvering av raten, maks 48 timer. En kilde med
 ti innlegg i uka løftes rundt 13 timer, én i uka rundt 27 timer, VG med flere
