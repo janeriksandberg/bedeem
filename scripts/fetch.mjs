@@ -19,8 +19,11 @@ const LIMITS = {
   commentChars: 800,
   commentsPerItem: 75,   // minst de siste/beste 75 svarene der kilden gir så mange
   commentDepth: 6,
-  redditCommentBudget: Number(process.env.REDDIT_COMMENT_BUDGET || 10),
+  redditCommentBudget: Number(process.env.REDDIT_COMMENT_BUDGET || 40), // tidsbudsjettet stopper oss før dette uansett
   redditDelayMs: 10000,
+  // Uten Reddit-nøkler hentes bare en andel av subreddit-listene per kjøring (de som ble
+  // hentet for lengst siden), så tidsbudsjettet ikke går med til lister alene.
+  redditListingsPerRun: Number(process.env.REDDIT_LISTINGS_PER_RUN || 6),
   invisionTopicBudget: Number(process.env.INVISION_TOPIC_BUDGET || 20),
   invisionDelayMs: 1500,
 };
@@ -218,32 +221,25 @@ async function redditToken() {
 async function redditGet(url, { soft403 = false, oauth = false } = {}) {
   if (reddit.blocked) throw new Error('Reddit har svart 429/403 tidligere i denne kjøringen');
   if (Date.now() > reddit.deadline) throw new Error('Reddit: tidsbudsjettet for denne kjøringen er brukt opp');
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const wait = reddit.lastRequest + LIMITS.redditDelayMs - Date.now();
-    if (wait > 0) await sleep(wait);
-    reddit.lastRequest = Date.now();
-    const headers = { Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' };
-    if (oauth) {
-      headers.Authorization = `bearer ${await redditToken()}`;
-      headers['User-Agent'] = 'bedeem-reader/1.0 (github.com/janeriksandberg/bedeem)';
-      headers.Accept = 'application/json';
-    }
-    const res = await fetchText(url, { headers });
-    if (res.status === 429 && attempt === 0) {
-      if (Date.now() + 65000 > reddit.deadline) throw new Error('Reddit: tidsbudsjettet for denne kjøringen er brukt opp');
-      log('Reddit 429 – venter 65 s og prøver igjen');
-      await sleep(65000);
-      continue;
-    }
-    if (res.status === 403 && soft403) throw new Error('Reddit HTTP 403');
-    if (res.status === 429 || res.status === 403) {
-      reddit.blocked = true;
-      throw new Error(`Reddit HTTP ${res.status}`);
-    }
-    if (res.status !== 200) throw new Error(`Reddit HTTP ${res.status}`);
-    return res.text;
+  const wait = reddit.lastRequest + LIMITS.redditDelayMs - Date.now();
+  if (wait > 0) await sleep(wait);
+  reddit.lastRequest = Date.now();
+  const headers = { Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' };
+  if (oauth) {
+    headers.Authorization = `bearer ${await redditToken()}`;
+    headers['User-Agent'] = 'bedeem-reader/1.0 (github.com/janeriksandberg/bedeem)';
+    headers.Accept = 'application/json';
   }
-  throw new Error('Reddit: ga opp');
+  const res = await fetchText(url, { headers });
+  // Ved 429 venter vi ikke på at kvoten skal åpne seg igjen: det spiser mer av tidsbudsjettet
+  // enn det gir tilbake. Neste kjøring om 10 minutter tar over der denne slapp.
+  if (res.status === 403 && soft403) throw new Error('Reddit HTTP 403');
+  if (res.status === 429 || res.status === 403) {
+    reddit.blocked = true;
+    throw new Error(`Reddit HTTP ${res.status}`);
+  }
+  if (res.status !== 200) throw new Error(`Reddit HTTP ${res.status}`);
+  return res.text;
 }
 
 // Kommentartre fra det offisielle API-et (krever OAuth).
@@ -336,6 +332,8 @@ async function fetchRedditListingApi(src, existing) {
       _redditSub: src.subreddit,
       _t3: fullId,
       _numComments: Number(d.num_comments || 0),
+      _rank: items.length,
+      _listing: listing,
     });
   }
   return { items };
@@ -384,6 +382,8 @@ async function fetchReddit(src, existing) {
       commentsAt: prev?.commentsAt,
       _redditSub: src.subreddit,
       _t3: fullId,
+      _rank: items.length,
+      _listing: listing,
     });
   }
   return { items };
@@ -469,15 +469,34 @@ function needsCommentRefresh(item) {
   const since = now - new Date(item.commentsAt);
   return since > (age < 6 * 3600e3 ? 1 : 4) * 3600e3;
 }
+// Innenfor én kilde: tråder med flest svar først når listen oppgir antall (API), ellers
+// plasseringen i hot/top-listen (øverst = mest aktivitet). I «new»-lister og for innlegg som
+// ikke stod i dagens liste teller alder.
+function threadPriority(a, b) {
+  if (a._numComments != null && b._numComments != null && a._numComments !== b._numComments) return b._numComments - a._numComments;
+  const ra = a._listing && a._listing !== 'new' ? a._rank : Infinity;
+  const rb = b._listing && b._listing !== 'new' ? b._rank : Infinity;
+  if (ra !== rb) return ra - rb;
+  return new Date(b.time) - new Date(a.time);
+}
 function pickForRefresh(items, budget) {
-  return items
-    .filter(needsCommentRefresh)
-    .sort((a, b) => {
-      if (!a.commentsAt !== !b.commentsAt) return a.commentsAt ? 1 : -1;
-      if (!a.commentsAt) return new Date(b.time) - new Date(a.time);
-      return new Date(a.commentsAt) - new Date(b.commentsAt);
-    })
-    .slice(0, budget);
+  const due = items.filter(needsCommentRefresh);
+  // Aldri hentede tråder først, fordelt jevnt mellom kildene (rundgang) så en stor subreddit
+  // ikke stjeler hele budsjettet. Deretter de som har gått lengst uten oppdatering.
+  const fresh = new Map();
+  for (const it of due.filter((it) => !it.commentsAt)) {
+    if (!fresh.has(it.source)) fresh.set(it.source, []);
+    fresh.get(it.source).push(it);
+  }
+  for (const list of fresh.values()) list.sort(threadPriority);
+  const out = [];
+  const queues = [...fresh.values()];
+  for (let i = 0; out.length < budget && queues.some((q) => q.length); i = (i + 1) % queues.length) {
+    const next = queues[i].shift();
+    if (next) out.push(next);
+  }
+  const stale = due.filter((it) => it.commentsAt).sort((a, b) => new Date(a.commentsAt) - new Date(b.commentsAt));
+  return [...out, ...stale].slice(0, budget);
 }
 
 // Kjøres etter at alle Reddit-lister er hentet, med felles budsjett på tvers av subreddits.
@@ -843,6 +862,11 @@ async function main() {
     ...configured.filter((s) => s.type === 'reddit').sort((a, b) => lastOkOf(a) - lastOkOf(b)),
   ];
   log(`Har ${existing.size} innlegg fra før. Kilder: ${sources.map((s) => s.id).join(', ')}`);
+  // Uten nøkler koster hver Reddit-liste 10 s. Hent bare de som har ventet lengst denne
+  // runden (de står først etter sorteringen over); resten beholder forrige innhold.
+  const redditListNow = new Set(
+    REDDIT_OAUTH ? [] : sources.filter((s) => s.type === 'reddit').slice(0, LIMITS.redditListingsPerRun).map((s) => s.id),
+  );
 
   const cutoff = new Date(now - RETENTION_DAYS * 86400e3);
   const all = new Map([...existing].filter(([, it]) => new Date(it.time) >= cutoff));
@@ -851,6 +875,11 @@ async function main() {
     const st = statusFile.sources[src.id] || {};
     st.name = src.name; st.type = src.type; st.lastRun = iso();
     delete st.error; delete st.warn;
+    if (src.type === 'reddit' && !REDDIT_OAUTH && !redditListNow.has(src.id) && st.lastOk) {
+      // Står over i rotasjonen denne gangen; kommentarer til eksisterende innlegg hentes likevel.
+      statusFile.sources[src.id] = st;
+      continue;
+    }
     try {
       let result;
       if (src.type === 'rss') result = await fetchRss(src);

@@ -91,7 +91,9 @@ node scripts/fetch.mjs        # henter innhold til data/
 node scripts/serve.mjs 8787   # statisk server på http://localhost:8787/
 ```
 
-Miljøvariabler: `REDDIT_COMMENT_BUDGET` (standard 10 tråder per kjøring, 150 med Reddit-nøkler),
+Miljøvariabler: `REDDIT_COMMENT_BUDGET` (standard 40 tråder per kjøring, 150 med Reddit-nøkler;
+tidsbudsjettet `REDDIT_MAX_MS`, 9 min, stopper uansett før), `REDDIT_LISTINGS_PER_RUN` (6: uten
+nøkler hentes bare så mange subreddit-lister per kjøring, de som har ventet lengst),
 `INVISION_TOPIC_BUDGET` (20), `RETENTION_DAYS` (60).
 
 ## Reddit-tråder (anbefalt oppsett)
