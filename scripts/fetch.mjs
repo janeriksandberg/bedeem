@@ -198,6 +198,7 @@ if (REDDIT_OAUTH) {
 const reddit = {
   lastRequest: 0,
   blocked: false,
+  waited429: false,
   commentBudget: LIMITS.redditCommentBudget,
   // Samlet tidsbudsjett for Reddit per kjøring, så jobben aldri drar ut.
   deadline: Date.now() + Number(process.env.REDDIT_MAX_MS || 9 * 60000),
@@ -231,8 +232,15 @@ async function redditGet(url, { soft403 = false, oauth = false } = {}) {
     headers.Accept = 'application/json';
   }
   const res = await fetchText(url, { headers });
-  // Ved 429 venter vi ikke på at kvoten skal åpne seg igjen: det spiser mer av tidsbudsjettet
-  // enn det gir tilbake. Neste kjøring om 10 minutter tar over der denne slapp.
+  // 429 kommer fra Reddits grense for GitHub-adressen, ikke fra vårt tempo (sett allerede på
+  // andre forespørsel). Én gang per kjøring venter vi til minuttvinduet er over og prøver
+  // igjen; kommer det enda en 429, avsluttes Reddit-delen og neste kjøring tar over.
+  if (res.status === 429 && !reddit.waited429 && Date.now() + 65000 < reddit.deadline) {
+    reddit.waited429 = true;
+    log('Reddit 429 – venter 65 s og prøver én gang til');
+    await sleep(65000);
+    return redditGet(url, { soft403, oauth });
+  }
   if (res.status === 403 && soft403) throw new Error('Reddit HTTP 403');
   if (res.status === 429 || res.status === 403) {
     reddit.blocked = true;
