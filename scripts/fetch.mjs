@@ -24,6 +24,10 @@ const LIMITS = {
   // Uten Reddit-nøkler hentes bare en andel av subreddit-listene per kjøring (de som ble
   // hentet for lengst siden), så tidsbudsjettet ikke går med til lister alene.
   redditListingsPerRun: Number(process.env.REDDIT_LISTINGS_PER_RUN || 6),
+  // Uten nøkler: få innlegg per subreddit, så de få forespørslene som slipper gjennom
+  // rekker å hente kommentarene til dem. Med nøkler hentes 100.
+  redditPostsPerListing: Number(process.env.REDDIT_POSTS_PER_LISTING || 10),
+  redditListedWindowH: 12, // uten nøkler hentes kommentarer bare til innlegg som stod i en liste de siste timene
   invisionTopicBudget: Number(process.env.INVISION_TOPIC_BUDGET || 20),
   invisionDelayMs: 1500,
 };
@@ -337,6 +341,7 @@ async function fetchRedditListingApi(src, existing) {
       comments: prev?.comments,
       commentCount: Math.max(Number(d.num_comments || 0), prev?.commentCount || 0),
       commentsAt: prev?.commentsAt,
+      listedAt: iso(), // sist sett i en liste; styrer hvilke tråder som får kommentarer uten nøkler
       _redditSub: src.subreddit,
       _t3: fullId,
       _numComments: Number(d.num_comments || 0),
@@ -350,7 +355,7 @@ async function fetchRedditListingApi(src, existing) {
 async function fetchReddit(src, existing) {
   if (REDDIT_OAUTH) return fetchRedditListingApi(src, existing);
   const listing = src.listing || 'new';
-  const xml = await redditGet(`https://www.reddit.com/r/${src.subreddit}/${listing}.rss?limit=100${src.t ? '&t=' + encodeURIComponent(src.t) : ''}`);
+  const xml = await redditGet(`https://www.reddit.com/r/${src.subreddit}/${listing}.rss?limit=${LIMITS.redditPostsPerListing}${src.t ? '&t=' + encodeURIComponent(src.t) : ''}`);
   const items = [];
   for (const b of splitBlocks(xml, 'entry')) {
     const fullId = tagText(b, 'id'); // t3_xxxx
@@ -388,6 +393,7 @@ async function fetchReddit(src, existing) {
       comments: prev?.comments,
       commentCount: prev?.commentCount,
       commentsAt: prev?.commentsAt,
+      listedAt: iso(), // sist sett i en liste; styrer hvilke tråder som får kommentarer uten nøkler
       _redditSub: src.subreddit,
       _t3: fullId,
       _rank: items.length,
@@ -473,6 +479,13 @@ function needsCommentRefresh(item) {
   if (age > 48 * 3600e3) return false;
   // Listen fra API-et sier at tråden er tom – ingenting å hente ennå.
   if (item._numComments === 0 && !(item.comments && item.comments.length)) return false;
+  if (!REDDIT_OAUTH) {
+    // Uten nøkler: bare innlegg som nylig stod i en liste (de 10 per subreddit), og sjeldnere
+    // oppfrisking. Innlegg som er hentet én gang viker for dem som aldri er hentet.
+    if (!item.listedAt || now - new Date(item.listedAt) > LIMITS.redditListedWindowH * 3600e3) return false;
+    if (!item.commentsAt) return true;
+    return now - new Date(item.commentsAt) > 3 * 3600e3;
+  }
   if (!item.commentsAt) return true;
   const since = now - new Date(item.commentsAt);
   return since > (age < 6 * 3600e3 ? 1 : 4) * 3600e3;
