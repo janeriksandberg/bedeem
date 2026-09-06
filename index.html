@@ -17,7 +17,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow">
-<link rel="stylesheet" href="styles.css?v=8">
+<link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
 <header class="top" id="top">
@@ -30,8 +30,10 @@
       <button class="btn" id="fontDown" type="button" aria-label="Mindre tekst" title="Mindre tekst">A<span class="sub">−</span></button>
       <button class="btn" id="fontUp" type="button" aria-label="Større tekst" title="Større tekst">A<span class="sub">+</span></button>
     </div>
+    <div class="group">
+      <button class="btn star-btn" id="starsBtn" type="button" aria-pressed="false" aria-label="Vis bare stjernemerkede innlegg" title="Vis bare stjernemerkede innlegg">★</button>
+    </div>
     <div class="group" role="group" aria-label="Antall innlegg i buffer">
-      <button class="btn buf" type="button" data-n="500" title="500 innlegg i buffer">0,5K</button>
       <button class="btn buf" type="button" data-n="1000" title="1000 innlegg i buffer">1K</button>
       <button class="btn buf" type="button" data-n="10000" title="10 000 innlegg i buffer">10K</button>
     </div>
@@ -73,6 +75,6 @@
 <footer class="foot" id="foot"></footer>
 <button class="jump" id="jump" type="button" hidden aria-label="Hopp ned til der du var" title="Hopp ned til der du var">↓</button>
 
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

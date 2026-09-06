@@ -302,6 +302,10 @@ button { font: inherit; }
 }
 .actions button[aria-expanded="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 .actions .note { color: var(--muted); }
+/* Stjerne per innlegg: ytterst til høyre, rosa når den er på. */
+.actions .star { margin-left: auto; font-size: 1.25rem; min-width: 44px; justify-content: center; padding: 0 .4em; color: var(--muted); }
+.actions .star.on { color: var(--pink); border-color: var(--pink); background: var(--pink-soft); }
+.btn.star-btn { font-size: 19px; }
 
 /* ---------- Tråd ---------- */
 .thread { margin-top: .6rem; }

@@ -4,7 +4,7 @@
   'use strict';
 
   const FONT_STEPS = [14, 16, 18, 20, 23, 26, 30];
-  const BUFFERS = [500, 1000, 10000];
+  const BUFFERS = [1000, 10000];
   const BOOK_FILES = ['books.json'];   // filer med bok-påminnelser (books.json kan peke videre med "include")
   const DEFAULT_BOOK_MAX = 10;         // maks bokkort per 100 innlegg
   const DEFAULT_BOOK_MIN = 3;          // minst bokkort per 100 innlegg
@@ -18,6 +18,7 @@
   const BATCH = 20;
   const SETTINGS_KEY = 'bedeem:settings';
   const VISIT_KEY = 'bedeem:lastVisit';
+  const STARS_KEY = 'bedeem:stars';
 
   const $ = (sel) => document.querySelector(sel);
   const feedEl = $('#feed');
@@ -60,6 +61,7 @@
     loading: false,
     loadedDays: 0,
     extraDays: 0,         // "Last inn eldre" utover bufferen
+    starsOnly: false,     // ★ i toppen: vis bare stjernemerkede innlegg
   };
 
   // ---------- Hjelpere ----------
@@ -165,6 +167,57 @@
     });
   }
 
+  // ---------- Stjernemerkede innlegg ----------
+  // Lagres på enheten som en kopi av hele innlegget (med svar), så de finnes selv etter at
+  // innlegget har falt ut av bufferen eller arkivet.
+  const stars = loadStars(); // id -> kopi av innlegget + starredAt
+  function loadStars() {
+    try {
+      const s = JSON.parse(localStorage.getItem(STARS_KEY) || '{}');
+      return s && typeof s === 'object' && !Array.isArray(s) ? s : {};
+    } catch { return {}; }
+  }
+  function saveStars() {
+    try { localStorage.setItem(STARS_KEY, JSON.stringify(stars)); return true; } catch { /* fullt lager */ }
+    // Fullt lager: prøv uten svarene, som tar mest plass.
+    for (const s of Object.values(stars)) delete s.comments;
+    try { localStorage.setItem(STARS_KEY, JSON.stringify(stars)); return true; } catch { /* fortsatt fullt */ }
+    showBanner('Fikk ikke lagret stjernen – lageret i nettleseren er fullt. Fjern noen stjerner.');
+    return false;
+  }
+  const snapshot = (it) => Object.fromEntries(Object.entries(it).filter(([k]) => !k.startsWith('_')));
+  const isStarred = (id) => Object.prototype.hasOwnProperty.call(stars, id);
+  function toggleStar(it) {
+    if (isStarred(it.id)) delete stars[it.id];
+    else stars[it.id] = { ...snapshot(it), starredAt: Date.now() };
+    saveStars();
+    applyStarsButton();
+    if (state.starsOnly) setStatus(statusText(), state.offline);
+    return isStarred(it.id);
+  }
+  // Nyeste stjerne først. Finnes innlegget fortsatt i bufferen, vises den ferske utgaven (nye svar).
+  function starredItems() {
+    const live = new Map(state.items.map((it) => [it.id, it]));
+    return Object.values(stars)
+      .sort((a, b) => (b.starredAt || 0) - (a.starredAt || 0))
+      .map((s) => live.get(s.id) || s);
+  }
+  function applyStarsButton() {
+    const b = $('#starsBtn');
+    const n = Object.keys(stars).length;
+    b.classList.toggle('active', state.starsOnly);
+    b.setAttribute('aria-pressed', state.starsOnly ? 'true' : 'false');
+    b.title = state.starsOnly ? 'Vis alle innlegg igjen' : `Vis bare stjernemerkede innlegg (${n})`;
+    b.setAttribute('aria-label', b.title);
+  }
+  $('#starsBtn').addEventListener('click', () => {
+    state.starsOnly = !state.starsOnly;
+    applyStarsButton();
+    renderReset();
+    window.scrollTo(0, 0);
+    setStatus(statusText(), state.offline);
+  });
+
   // ---------- Hopp tilbake til det lengste du har scrollet ----------
   const jumpBtn = $('#jump');
   let maxScroll = 0;
@@ -193,6 +246,7 @@
   function statusText() {
     const n = state.items.length;
     const gen = state.index?.generated;
+    if (state.starsOnly) return `${Object.keys(stars).length} stjernemerkede innlegg${state.offline ? ' · frakoblet' : ''}`;
     if (state.offline) return `Frakoblet · ${n} innlegg i buffer${gen ? ' · fra ' + fmtTime(gen) : ''}`;
     return `${n} innlegg${gen ? ' · oppdatert ' + fmtTime(gen) : ''}`;
   }
@@ -319,6 +373,14 @@
     const uniq = items.filter((it) => (seen.has(it.id) ? false : (seen.add(it.id), true)));
     uniq.sort((a, b) => (a.time < b.time ? 1 : a.time > b.time ? -1 : 0));
     computeRateFallback(uniq);
+    // Oppfrisk kopiene av stjernemerkede innlegg (f.eks. nye svar) så lenge de finnes i arkivet.
+    let starsChanged = false;
+    for (const it of uniq) {
+      if (!isStarred(it.id)) continue;
+      stars[it.id] = { ...snapshot(it), starredAt: stars[it.id].starredAt };
+      starsChanged = true;
+    }
+    if (starsChanged) saveStars();
     const visible = uniq.filter((it) => !hidden.has(it.source) && poopKeeps(it));
     const limit = want + (state.extraDays ? Infinity : 0);
     state.items = Number.isFinite(limit) ? visible.slice(0, limit) : visible;
@@ -339,8 +401,10 @@
   function renderReset() {
     feedEl.innerHTML = '';
     state.rendered = 0;
-    state.display = buildDisplay();
-    if (!state.items.length) {
+    state.display = state.starsOnly ? starredItems() : buildDisplay();
+    if (state.starsOnly) {
+      if (!state.display.length) feedEl.innerHTML = '<p class="empty">Ingen stjernemerkede innlegg ennå. Trykk ☆ på et innlegg for å ta vare på det.</p>';
+    } else if (!state.items.length) {
       feedEl.innerHTML = `<p class="empty">Ingen innlegg å vise${settings.hidden.length ? ' – sjekk hvilke kilder som er skrudd av under «Kilder»' : ''}.</p>`;
     }
     renderMore();
@@ -366,6 +430,7 @@
     const total = state.display.length;
     if (!total) { footEl.innerHTML = ''; return; }
     if (state.rendered < total) { footEl.textContent = `${state.rendered} av ${total} vist – bla videre`; return; }
+    if (state.starsOnly) { footEl.innerHTML = `<div>Alle ${total} stjernemerkede innlegg er vist.</div>`; return; }
     const more = document.createElement('button');
     more.className = 'btn';
     more.type = 'button';
@@ -418,6 +483,8 @@
     } else if (nc > 0) {
       actions.push(`<span class="note">${nc} svar (ikke hentet ennå)</span>`);
     }
+    const starOn = isStarred(it.id);
+    actions.push(`<button type="button" class="star${starOn ? ' on' : ''}" aria-pressed="${starOn}" title="${starOn ? 'Fjern stjerne' : 'Stjernemerk: ta vare på innlegget'}" aria-label="${starOn ? 'Fjern stjerne' : 'Stjernemerk innlegget'}">${starOn ? '★' : '☆'}</button>`);
 
     art.innerHTML = `
       <div class="meta">${meta.join('')}</div>
@@ -427,6 +494,15 @@
 
     const thr = art.querySelector('.thr');
     if (thr) thr.addEventListener('click', () => toggleThread(art, it, thr));
+    const starBtn = art.querySelector('.star');
+    starBtn.addEventListener('click', () => {
+      const on = toggleStar(it);
+      starBtn.classList.toggle('on', on);
+      starBtn.setAttribute('aria-pressed', String(on));
+      starBtn.textContent = on ? '★' : '☆';
+      starBtn.title = on ? 'Fjern stjerne' : 'Stjernemerk: ta vare på innlegget';
+      starBtn.setAttribute('aria-label', on ? 'Fjern stjerne' : 'Stjernemerk innlegget');
+    });
     return art;
   }
 
@@ -763,6 +839,7 @@
   // ---------- Start ----------
   applyFont();
   applyBufferButtons();
+  applyStarsButton();
   (async () => {
     await loadSources();
     await loadFeed();
