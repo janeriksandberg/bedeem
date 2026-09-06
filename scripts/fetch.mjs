@@ -182,6 +182,16 @@ async function fetchRss(src) {
 }
 
 // --- Reddit: liste via RSS, kommentarer via shreddit-HTML (med dybde).
+// Valgfritt: med REDDIT_CLIENT_ID/REDDIT_CLIENT_SECRET (Reddit-app av typen «script») brukes
+// Reddits offisielle API for både lister og tråder. Det gir hele kommentartreet, og kvoten
+// (100 forespørsler/min) er så romslig at vi kan hente langt flere tråder per kjøring.
+const REDDIT_OAUTH = process.env.REDDIT_CLIENT_ID && process.env.REDDIT_CLIENT_SECRET
+  ? { id: process.env.REDDIT_CLIENT_ID, secret: process.env.REDDIT_CLIENT_SECRET, token: null }
+  : null;
+if (REDDIT_OAUTH) {
+  LIMITS.redditDelayMs = 1200;
+  if (!process.env.REDDIT_COMMENT_BUDGET) LIMITS.redditCommentBudget = 150;
+}
 const reddit = {
   lastRequest: 0,
   blocked: false,
@@ -189,12 +199,6 @@ const reddit = {
   // Samlet tidsbudsjett for Reddit per kjøring, så jobben aldri drar ut.
   deadline: Date.now() + Number(process.env.REDDIT_MAX_MS || 9 * 60000),
 };
-// Valgfritt: med REDDIT_CLIENT_ID/REDDIT_CLIENT_SECRET (Reddit-app av typen «script») brukes
-// Reddits offisielle API, som gir hele kommentartreet og langt høyere kvote.
-const REDDIT_OAUTH = process.env.REDDIT_CLIENT_ID && process.env.REDDIT_CLIENT_SECRET
-  ? { id: process.env.REDDIT_CLIENT_ID, secret: process.env.REDDIT_CLIENT_SECRET, token: null }
-  : null;
-if (REDDIT_OAUTH) LIMITS.redditDelayMs = 1200;
 
 async function redditToken() {
   if (REDDIT_OAUTH.token) return REDDIT_OAUTH.token;
@@ -303,7 +307,42 @@ async function fetchRedditThread(sub, t3) {
   return { comments: parseRedditRssComments(xml), flat: true };
 }
 
+// Liste via det offisielle API-et (krever OAuth). Gir også antall svar per innlegg,
+// så vi slipper å bruke budsjett på tråder uten svar.
+async function fetchRedditListingApi(src, existing) {
+  const listing = src.listing || 'new';
+  const text = await redditGet(`https://oauth.reddit.com/r/${src.subreddit}/${listing}?limit=100&raw_json=1${src.t ? '&t=' + encodeURIComponent(src.t) : ''}`, { oauth: true });
+  const json = JSON.parse(text);
+  const items = [];
+  for (const ch of json?.data?.children || []) {
+    if (ch.kind !== 't3') continue;
+    const d = ch.data;
+    const fullId = d.name;
+    if (!fullId) continue;
+    const prev = existing.get(`${src.id}:${fullId}`);
+    const externalUrl = !d.is_self && d.url && !/reddit\.com\/r\/[^/]+\/comments\//i.test(d.url) ? stripTracking(d.url) : undefined;
+    items.push({
+      id: `${src.id}:${fullId}`,
+      source: src.id,
+      title: decodeEntities(d.title || '').trim(),
+      url: `https://www.reddit.com${d.permalink}`,
+      externalUrl,
+      time: prev?.time || iso(new Date((d.created_utc || 0) * 1000)),
+      author: d.author && d.author !== '[deleted]' ? d.author : undefined,
+      body: truncate(decodeEntities(d.selftext || '').trim(), LIMITS.bodyChars),
+      comments: prev?.comments,
+      commentCount: Math.max(Number(d.num_comments || 0), prev?.commentCount || 0),
+      commentsAt: prev?.commentsAt,
+      _redditSub: src.subreddit,
+      _t3: fullId,
+      _numComments: Number(d.num_comments || 0),
+    });
+  }
+  return { items };
+}
+
 async function fetchReddit(src, existing) {
+  if (REDDIT_OAUTH) return fetchRedditListingApi(src, existing);
   const listing = src.listing || 'new';
   const xml = await redditGet(`https://www.reddit.com/r/${src.subreddit}/${listing}.rss?limit=100${src.t ? '&t=' + encodeURIComponent(src.t) : ''}`);
   const items = [];
@@ -424,6 +463,8 @@ function pruneThread(comments) {
 function needsCommentRefresh(item) {
   const age = now - new Date(item.time);
   if (age > 48 * 3600e3) return false;
+  // Listen fra API-et sier at tråden er tom – ingenting å hente ennå.
+  if (item._numComments === 0 && !(item.comments && item.comments.length)) return false;
   if (!item.commentsAt) return true;
   const since = now - new Date(item.commentsAt);
   return since > (age < 6 * 3600e3 ? 1 : 4) * 3600e3;

@@ -91,7 +91,7 @@ node scripts/fetch.mjs        # henter innhold til data/
 node scripts/serve.mjs 8787   # statisk server på http://localhost:8787/
 ```
 
-Miljøvariabler: `REDDIT_COMMENT_BUDGET` (standard 10 tråder per kjøring),
+Miljøvariabler: `REDDIT_COMMENT_BUDGET` (standard 10 tråder per kjøring, 150 med Reddit-nøkler),
 `INVISION_TOPIC_BUDGET` (20), `RETENTION_DAYS` (60).
 
 ## Reddit-tråder (anbefalt oppsett)
@@ -108,4 +108,5 @@ trådstruktur og god kvote:
 4. I GitHub-repoet: Settings → Secrets and variables → Actions → New repository
    secret. Legg inn `REDDIT_CLIENT_ID` og `REDDIT_CLIENT_SECRET`.
 
-Neste kjøring bruker da det offisielle API-et automatisk.
+Neste kjøring bruker da det offisielle API-et automatisk, både for innleggslistene og
+trådene, med 1,2 s mellom forespørslene og 150 tråder per kjøring.
