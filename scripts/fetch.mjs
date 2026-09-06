@@ -879,6 +879,23 @@ async function main() {
   const cutoff = new Date(now - RETENTION_DAYS * 86400e3);
   const all = new Map([...existing].filter(([, it]) => new Date(it.time) >= cutoff));
 
+  // Reddit stenger ofte GitHub-adressen ute etter bare én–to forespørsler, uansett tempo.
+  // Uten nøkler veksler vi derfor mellom kjøringer: annenhver gang hentes kommentarer til
+  // innlegg vi allerede har FØR listene, så ikke listene alltid bruker opp de få forespørslene.
+  const redditSources = sources.filter((s) => s.type === 'reddit');
+  const commentsFirst = !REDDIT_OAUTH && redditSources.length > 0 && !statusFile.redditCommentsFirst;
+  statusFile.redditCommentsFirst = commentsFirst;
+  const preRefreshed = {};
+  const preWarn = {};
+  if (commentsFirst) {
+    const n = await refreshRedditComments(redditSources, all, statusFile);
+    log(`Reddit: ${n} kommentartråder oppdatert (før listene)`);
+    for (const s of redditSources) {
+      preRefreshed[s.id] = statusFile.sources[s.id]?.lastRefreshed || 0;
+      preWarn[s.id] = statusFile.sources[s.id]?.warn;
+    }
+  }
+
   for (const src of sources) {
     const st = statusFile.sources[src.id] || {};
     st.name = src.name; st.type = src.type; st.lastRun = iso();
@@ -905,9 +922,10 @@ async function main() {
         all.set(it.id, { ...prev, ...stripUndefined(it) });
       }
       const mine = [...all.values()].filter((it) => it.source === src.id);
-      let refreshed = 0;
+      let refreshed = preRefreshed[src.id] || 0;
       if (src.type === 'invision') refreshed = await refreshInvisionTopics(mine, st);
       st.ok = true; st.lastOk = iso(); st.count = mine.length; st.lastAdded = added; st.lastRefreshed = refreshed;
+      if (preWarn[src.id] && !st.warn) st.warn = preWarn[src.id];
       log(`${src.id}: ${result.items.length} hentet, ${added} nye, ${refreshed} tråder oppdatert${st.warn ? ' – ' + st.warn : ''}`);
     } catch (e) {
       const msg = String(e.message || e).slice(0, 300);
@@ -923,8 +941,7 @@ async function main() {
     statusFile.sources[src.id] = st;
   }
 
-  const redditSources = sources.filter((s) => s.type === 'reddit');
-  if (redditSources.length) {
+  if (redditSources.length && !commentsFirst) {
     const n = await refreshRedditComments(redditSources, all, statusFile);
     log(`Reddit: ${n} kommentartråder oppdatert`);
   }
