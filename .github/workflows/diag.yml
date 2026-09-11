@@ -18,7 +18,7 @@ jobs:
           exec > data/diag.txt 2>&1
           UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36'
           t() { printf '%s  ' "$(curl -sL -A "$UA" --max-time 20 -o /tmp/out -w '%{http_code} %{size_download}' "$@")"; echo "$*" | tr -d '\n'; echo; grep -c 'Just a moment' /tmp/out | sed 's/^/   challenge-hits: /'; }
-          for p in '' hot fresh top funny wholesome cute comic meme animals random; do t "https://9gag.com/"; done
+          for p in '' hot fresh top funny wholesome cute comic meme animals random; do t "https://9gag.com/$p"; done
           t 'https://9gag.com/' -H 'Accept: text/html'
           t 'https://9gag.com/v1/group-posts/group/default/type/hot' -H 'Accept: application/json'
           echo '--- node fetch'
