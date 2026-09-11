@@ -1,5 +1,5 @@
 {
-  "_help": "Legg til en ny kilde ved å legge inn et nytt objekt i listen. Typer: rss (RSS/Atom-feed), reddit (subreddit; valgfritt listing=new|hot|top og t=day|week), invision (Invision Community-forum, f.eks. Kvinneguiden), entur (avvik for tog via Entur), cisa-kev (CISA Known Exploited Vulnerabilities, JSON), politiloggen (districts=[...], valgfritt municipalities=[...]), boredpanda (url til en Bored Panda-feed; bare listebildene hentes, maxItems per kjøring og maxPerArticle per artikkel), 9gag (group9gag=default|meme|funny|…, listing=hot|fresh|top; bare rene bilder). Feltet 'short' vises som merkelapp i appen, 'group' brukes til gruppering i Kilder-panelet.",
+  "_help": "Legg til en ny kilde ved å legge inn et nytt objekt i listen. Typer: rss (RSS/Atom-feed), reddit (subreddit; valgfritt listing=new|hot|top og t=day|week), invision (Invision Community-forum, f.eks. Kvinneguiden), entur (avvik for tog via Entur), cisa-kev (CISA Known Exploited Vulnerabilities, JSON), politiloggen (districts=[...], valgfritt municipalities=[...]), listicle (url til en feed med nummererte listeartikler, f.eks. Bored Panda eller Pleated-Jeans; bare listebildene hentes, maxItems per kjøring og maxPerArticle per artikkel), lemmy (instance, community, sort=Hot|Active|New; bare bildeinnlegg), 9gag (group9gag=default|meme|funny|…, listing=hot|fresh|top; bare rene bilder). Feltet 'short' vises som merkelapp i appen, 'group' brukes til gruppering i Kilder-panelet.",
   "sources": [
     {
       "id": "vy-sande",
@@ -63,7 +63,12 @@
     { "id": "google-ti", "name": "Google Threat Intelligence / Mandiant", "short": "Mandiant", "group": "Sikkerhet", "type": "rss", "url": "https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/" },
     { "id": "unit42", "name": "Unit 42", "short": "Unit 42", "group": "Sikkerhet", "type": "rss", "url": "https://unit42.paloaltonetworks.com/feed/" },
 
-    { "id": "boredpanda", "name": "Bored Panda · Funny", "short": "Bored Panda", "group": "Memes", "type": "boredpanda", "url": "https://www.boredpanda.com/funny/feed/", "maxItems": 50, "maxPerArticle": 25 },
+    { "id": "boredpanda", "name": "Bored Panda · Funny", "short": "Bored Panda", "group": "Memes", "type": "listicle", "url": "https://www.boredpanda.com/funny/feed/", "maxItems": 50, "maxPerArticle": 25 },
+    { "id": "boredpanda-animals", "name": "Bored Panda · Animals", "short": "BP Dyr", "group": "Memes", "type": "listicle", "url": "https://www.boredpanda.com/animals/feed/", "maxItems": 50, "maxPerArticle": 25 },
+    { "id": "pleatedjeans", "name": "Pleated-Jeans", "short": "Pleated", "group": "Memes", "type": "listicle", "url": "https://pleated-jeans.com/feed/", "maxItems": 50, "maxPerArticle": 25 },
+    { "id": "lemmy-memes", "name": "Lemmy · memes", "short": "Lemmy memes", "group": "Memes", "type": "lemmy", "instance": "lemmy.world", "community": "memes", "sort": "Hot", "maxItems": 50 },
+    { "id": "lemmy-comics", "name": "Lemmy · comic strips", "short": "Comics", "group": "Memes", "type": "lemmy", "instance": "lemmy.world", "community": "comicstrips", "sort": "Hot", "maxItems": 50 },
+    { "id": "lemmy-cat", "name": "Lemmy · cats", "short": "Katter", "group": "Memes", "type": "lemmy", "instance": "lemmy.world", "community": "cat", "sort": "Hot", "maxItems": 50 },
     { "id": "9gag", "name": "9GAG · Hot", "short": "9GAG", "group": "Memes", "type": "9gag", "group9gag": "default", "listing": "hot", "maxItems": 50 }
   ]
 }

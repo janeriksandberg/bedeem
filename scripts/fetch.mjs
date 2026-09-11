@@ -37,6 +37,7 @@ const LIMITS = {
   imageItems: 50,
   imagePages: 20, // 9gag gir 10 innlegg per side, hvorav bare 3–7 er rene bilder
   imageDelayMs: 700,
+  imageMaxPx: 1024, // lengste side når kilden kan skalere ned (pictrs)
 };
 
 const now = new Date();
@@ -944,10 +945,11 @@ async function imageSize(url) {
   } catch { return null; }
 }
 
-// --- Bored Panda: listeartikler («40 memes …»). Feeden (content:encoded) inneholder hele listen
-// som <h1>#N</h1><img src=…>, så vi slipper å hente artikkelsidene. Bare listebildene tas med;
-// andre bilder i teksten (forfatter, annonser, innfelte innlegg) hoppes over.
-async function fetchBoredPanda(src, existing) {
+// --- Listeartikler («40 memes …») fra Bored Panda, Pleated-Jeans o.l. Feeden (content:encoded)
+// inneholder hele listen som nummerert overskrift («#1» eller «1.») etterfulgt av bildet, så vi
+// slipper å hente artikkelsidene. Bare listebildene tas med; andre bilder i teksten (forfatter,
+// annonser, innfelte innlegg) hoppes over.
+async function fetchListicle(src, existing) {
   const { text, status } = await fetchText(src.url, { headers: { Accept: 'application/rss+xml, application/xml, text/xml' } });
   if (status !== 200) throw new Error(`HTTP ${status}`);
   const max = src.maxItems || LIMITS.imageItems;
@@ -962,8 +964,8 @@ async function fetchBoredPanda(src, existing) {
   })).filter((a) => a.link && a.html).sort((a, b) => (b.date || 0) - (a.date || 0));
   for (const a of articles) {
     if (items.length >= max) break;
-    // Overskrift «#N» (ev. med bildetekst) etterfulgt av bildet. Alt annet ignoreres.
-    const re = /<h[1-3][^>]*>\s*#\s*(\d+)\s*([^<]*)<\/h[1-3]>\s*(?:<p[^>]*>\s*<\/p>\s*)*(?:<a[^>]*>\s*)?<img\b([^>]*)>/gi;
+    // Overskrift «#N» / «N.» (ev. med bildetekst) etterfulgt av bildet. Alt annet ignoreres.
+    const re = /<h[1-3][^>]*>\s*(?:<[^>]+>\s*)*#?\s*(\d+)[.:)]?\s*([^<]*)(?:<[^>]+>\s*)*<\/h[1-3]>\s*(?:<(?:p|div|figure)[^>]*>\s*)*(?:<a[^>]*>\s*)?<img\b([^>]*)>/gi;
     let m; let n = 0;
     while ((m = re.exec(a.html)) && n < perArticle && items.length < max) {
       const attrs = m[3];
@@ -975,6 +977,9 @@ async function fetchBoredPanda(src, existing) {
       const caption = htmlToText(m[2]).trim();
       const id = `${src.id}:${hash(imgUrl)}`;
       const prev = existing.get(id);
+      // WordPress oppgir ofte width/height på bildet; ellers leses de fra filhodet.
+      const wm = attrs.match(/\swidth=["'](\d+)["']/i); const hm = attrs.match(/\sheight=["'](\d+)["']/i);
+      const attrSize = wm && hm ? { w: Number(wm[1]), h: Number(hm[1]) } : null;
       n++;
       items.push({
         id,
@@ -986,28 +991,93 @@ async function fetchBoredPanda(src, existing) {
         time: iso(new Date((a.date || now).getTime() - (num - 1) * 1000)),
         author: a.author || undefined,
         body: '',
-        image: prev?.image?.w ? prev.image : { url: imgUrl, ...(await imageSize(imgUrl) || {}) },
+        image: prev?.image?.w ? prev.image : { url: imgUrl, ...(attrSize || await imageSize(imgUrl) || {}) },
       });
     }
   }
   return { items };
 }
 
-// --- 9gag: JSON-API-et bak forsiden. Bare rene bilder (ikke video/GIF), ikke NSFW.
-async function fetch9gag(src, existing) {
+// --- Lemmy (f.eks. lemmy.world): åpent API, bare innlegg som lenker rett til et bilde.
+async function fetchLemmy(src, existing) {
   const max = src.maxItems || LIMITS.imageItems;
-  const base = `https://9gag.com/v1/group-posts/group/${encodeURIComponent(src.group9gag || 'default')}/type/${encodeURIComponent(src.listing || 'hot')}`;
+  const base = `https://${src.instance || 'lemmy.world'}/api/v3/post/list?community_name=${encodeURIComponent(src.community)}&sort=${encodeURIComponent(src.sort || 'Hot')}&limit=50`;
   const items = [];
   let cursor = '';
-  for (let page = 0; page < LIMITS.imagePages && items.length < max; page++) {
+  for (let page = 0; page < 3 && items.length < max; page++) {
     if (page) await sleep(LIMITS.imageDelayMs);
-    const { text, status } = await fetchTextSmart(base + (cursor ? '?' + cursor : ''), { headers: { Accept: 'application/json' } });
+    const { text, status } = await fetchText(base + (cursor ? `&page_cursor=${encodeURIComponent(cursor)}` : ''), { headers: { Accept: 'application/json' } });
     if (status !== 200) throw new Error(`HTTP ${status}`);
     const json = JSON.parse(text);
-    const posts = json?.data?.posts || [];
+    const posts = json?.posts || [];
     if (!posts.length) break;
     for (const p of posts) {
       if (items.length >= max) break;
+      const post = p.post || {};
+      const url = post.url || '';
+      const isImage = /^image\//.test(post.url_content_type || '') || /\.(jpe?g|png|webp)(\?|$)/i.test(url);
+      if (!isImage || post.nsfw || post.removed || post.deleted || /\.gif(\?|$)/i.test(url)) continue;
+      const id = `${src.id}:${post.id}`;
+      const prev = existing.get(id);
+      let image = prev?.image?.w ? prev.image : null;
+      if (!image) {
+        const size = await imageSize(url);
+        image = { url, ...(size || {}) };
+        // Originalene på pictrs kan være på flere MB (4000 px). Be om en nedskalert webp-utgave.
+        if (/\/pictrs\/image\/[^?]+$/.test(url)) {
+          image.url = `${url}?format=webp&thumbnail=${LIMITS.imageMaxPx}`;
+          if (size && Math.max(size.w, size.h) > LIMITS.imageMaxPx) {
+            const f = LIMITS.imageMaxPx / Math.max(size.w, size.h);
+            image.w = Math.round(size.w * f); image.h = Math.round(size.h * f);
+          }
+        }
+      }
+      items.push({
+        id,
+        source: src.id,
+        title: decodeEntities(post.name || '').trim() || '(uten tittel)',
+        url: post.ap_id || `https://${src.instance || 'lemmy.world'}/post/${post.id}`,
+        time: prev?.time || iso(parseDate(post.published)),
+        author: p.creator?.name || undefined,
+        body: '',
+        commentCount: Number(p.counts?.comments || 0) || undefined,
+        image,
+      });
+    }
+    cursor = json?.next_page || '';
+    if (!cursor) break;
+  }
+  return { items };
+}
+
+// --- 9gag. Bare rene bilder (ikke video/GIF), ikke NSFW. Forsiden (HTML) inneholder de første
+// innleggene som JSON i window._config og slipper gjennom Cloudflare også fra GitHub Actions;
+// JSON-API-et bak (flere sider) blir derimot avvist derfra, så det brukes bare når det svarer.
+function parse9gagEmbedded(html) {
+  const key = 'window._config = JSON.parse("';
+  const start = html.indexOf(key);
+  if (start < 0) return null;
+  let i = start + key.length; let s = '';
+  while (i < html.length) {
+    const c = html[i];
+    if (c === '\\') { s += c + html[i + 1]; i += 2; continue; }
+    if (c === '"') break;
+    s += c; i++;
+  }
+  try { return JSON.parse(JSON.parse('"' + s + '"')); } catch { return null; }
+}
+async function fetch9gag(src, existing) {
+  const max = src.maxItems || LIMITS.imageItems;
+  const group = src.group9gag || 'default';
+  const listing = src.listing || 'hot';
+  const base = `https://9gag.com/v1/group-posts/group/${encodeURIComponent(group)}/type/${encodeURIComponent(listing)}`;
+  const items = [];
+  const seen = new Set();
+  const take = (posts) => {
+    for (const p of posts || []) {
+      if (items.length >= max) break;
+      if (!p?.id || seen.has(p.id)) continue;
+      seen.add(p.id);
       if (p.type !== 'Photo' || p.nsfw || p.promoted) continue;
       const img = p.images?.image700 || p.images?.image460;
       if (!img?.url) continue;
@@ -1024,10 +1094,33 @@ async function fetch9gag(src, existing) {
         image: { url: img.url, w: img.width, h: img.height },
       });
     }
-    cursor = json?.data?.nextCursor || '';
-    if (!cursor) break;
+  };
+  // 1) Siden selv (5–10 innlegg). Forsiden for 'default', ellers seksjonssiden.
+  let cursor = '';
+  let warn;
+  const pageUrl = group === 'default' ? `https://9gag.com/${listing === 'hot' ? '' : listing}` : `https://9gag.com/${encodeURIComponent(group)}${listing === 'hot' ? '' : '/' + listing}`;
+  const page = await fetchTextSmart(pageUrl, { headers: { Accept: 'text/html,application/xhtml+xml' } });
+  if (page.status !== 200) throw new Error(`HTTP ${page.status} (${pageUrl})`);
+  const cfg = parse9gagEmbedded(page.text);
+  if (!cfg?.data?.posts) throw new Error('Fant ikke innleggene i siden (window._config)');
+  take(cfg.data.posts);
+  cursor = cfg.data.nextCursor || '';
+  // 2) Flere sider fra API-et, så lenge det svarer.
+  for (let p = 0; p < LIMITS.imagePages && items.length < max && cursor && !process.env.NINEGAG_NO_API; p++) {
+    await sleep(LIMITS.imageDelayMs);
+    try {
+      const { text, status } = await fetchTextSmart(base + '?' + cursor, { headers: { Accept: 'application/json' } });
+      if (status !== 200) throw new Error(`HTTP ${status}`);
+      const json = JSON.parse(text);
+      if (!json?.data?.posts?.length) break;
+      take(json.data.posts);
+      cursor = json.data.nextCursor || '';
+    } catch (e) {
+      warn = `Bare forsiden (API-et svarte: ${e.message})`;
+      break;
+    }
   }
-  return { items };
+  return { items, warn };
 }
 
 function pick(arr) {
@@ -1121,10 +1214,12 @@ async function main() {
       else if (src.type === 'entur') result = await fetchEntur(src, all);
       else if (src.type === 'cisa-kev') result = await fetchCisaKev(src);
       else if (src.type === 'politiloggen') result = await fetchPolitiloggen(src, all);
-      else if (src.type === 'boredpanda') result = await fetchBoredPanda(src, all);
+      else if (src.type === 'boredpanda' || src.type === 'listicle') result = await fetchListicle(src, all);
       else if (src.type === '9gag') result = await fetch9gag(src, all);
+      else if (src.type === 'lemmy') result = await fetchLemmy(src, all);
       else throw new Error(`Ukjent kildetype ${src.type}`);
 
+      if (result.warn) st.warn = result.warn;
       let added = 0;
       for (const it of result.items) {
         if (!all.has(it.id)) added++;

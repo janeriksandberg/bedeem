@@ -34,16 +34,22 @@ Legg til et objekt i `sources` i `sources.json`. Støttede typer:
 | `entur`    | `stopPlaces`, `lines`, `authorities`, `keywords`, `url`  | Vy, tog Sande–Oslo       |
 
 | `cisa-kev` | `url` til CISA sin KEV-katalog (JSON)                    | CISA KEV                 |
-| `boredpanda` | `url` til en Bored Panda-feed, `maxItems`, `maxPerArticle` | Bored Panda · Funny   |
-| `9gag`     | `group9gag` (`default`, `meme`, `funny` …), `listing`, `maxItems` | 9GAG · Meme       |
+| `listicle` | `url` til en feed med nummererte listeartikler, `maxItems`, `maxPerArticle` | Bored Panda, Pleated-Jeans |
+| `lemmy`    | `instance`, `community`, `sort` (`Hot`, `Active`, `New`), `maxItems` | Lemmy · memes    |
+| `9gag`     | `group9gag` (`default`, `funny` …), `listing`, `maxItems` | 9GAG · Hot               |
 
-Bildekildene (gruppen «Memes») henter bare bilder: fra Bored Panda tas de nummererte
-listebildene i artikkelen (`<h1>#N</h1><img>` i feeden), ikke forfatterbilder, annonser
-eller innfelte innlegg; fra 9GAG tas bare innlegg av typen «Photo» (ikke video/GIF, ikke
-NSFW). Maks `maxItems` (50) bilder per kilde per kjøring. Bildene lenkes direkte fra
-kildenes CDN (de lagres ikke i repoet), og `Content-Security-Policy` i `index.html`
-må åpnes for CDN-vertene når nye bildekilder legges til. Bildene bufres ikke av
-service workeren, så uten nett vises bare tittelen.
+Bildekildene (gruppen «Memes») henter bare bilder, og appen viser dem med bare tittel og
+bilde. `listicle` tar de nummererte listebildene i artikkelen (`<h1>#1</h1><img>` hos
+Bored Panda, `<h2>1.</h2><img>` hos Pleated-Jeans), ikke forfatterbilder, annonser eller
+innfelte innlegg. `lemmy` bruker det åpne API-et og tar bare innlegg som lenker rett til et
+bilde (ikke GIF, ikke NSFW); bilder på pictrs hentes nedskalert (`?format=webp&thumbnail=1024`).
+`9gag` leser innleggene som ligger innbakt i selve siden (`window._config`), fordi
+JSON-API-et bak avvises av Cloudflare fra GitHub sine adresser; svarer API-et likevel,
+hentes flere sider. Maks `maxItems` (50) bilder per kilde per kjøring. Bildestørrelsen
+leses fra filhodet når kilden ikke oppgir den, så appen setter av riktig plass før
+bildet er lastet. Bildene lenkes direkte fra kildene (de lagres ikke i repoet; derfor
+tillater `Content-Security-Policy` i `index.html` bilder fra alle `https:`-verter), og de
+bufres ikke av service workeren, så uten nett vises bare tittelen.
 
 Alle kilder har `id` (unik, brukes i fil-ID-er), `name`, `short` (merkelapp i
 appen) og `group` (gruppering i Kilder-panelet). Sett `"enabled": false` for å
@@ -75,8 +81,9 @@ Kilder-panelet setter grensen for «veldig sjelden» (fra færre enn 1 til flere
 - `Content-Security-Policy` i `index.html` tillater bare skript og tilkoblinger fra eget
   domene. Det finnes ingen inline-skript.
 - Siden er merket `noindex, nofollow` for å holde den ute av søkemotorer.
-- Ingen pålogging, ingen sporing, ingen tredjepartsressurser. Innstillinger ligger kun i
-  nettleserens `localStorage`.
+- Ingen pålogging, ingen sporing. Eneste tredjepartsressurser er bildene i Memes-gruppen,
+  som lastes direkte fra kildene (uten referrer). Innstillinger ligger kun i nettleserens
+  `localStorage`.
 - Kontaktskjemaet bruker brukerens eget e-postprogram; mottakeradressen ligger ikke i
   klartekst i koden.
 - Innhentingen kjører med minste nødvendige rettigheter (`contents: write` for data,
