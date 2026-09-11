@@ -1,0 +1,33 @@
+name: Diagnose nett fra Actions
+# Midlertidig: tester hvilke kilder som svarer fra GitHub sine adresser. Fjernes etterpå.
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/diag.yml"]
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Test endepunkter
+        run: |
+          UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36'
+          t() { printf '%s  ' "$(curl -sL -A "$UA" --max-time 20 -o /tmp/out -w '%{http_code} %{size_download}' "$@")"; echo "$*" | tr -d '\n'; echo; grep -c 'Just a moment' /tmp/out | sed 's/^/   challenge-hits: /'; }
+          t 'https://9gag.com/v1/group-posts/group/default/type/hot' -H 'Accept: application/json'
+          t 'https://9gag.com/v1/group-posts/group/default/type/hot' -H 'Accept: application/json' --http1.1
+          t 'https://9gag.com/v1/group-posts/group/default/type/hot' -H 'Accept: application/json' -H 'Referer: https://9gag.com/' -H 'Accept-Language: en-US,en;q=0.9' -H 'Accept-Encoding: gzip, deflate, br' --compressed
+          t 'https://9gag.com/'
+          t 'https://9gag.com/hot'
+          t 'https://api.9gag.com/v2/post-list?group=1&type=hot&itemCount=10'
+          t 'https://img-9gag-fun.9cache.com/photo/abAj0yL_700b.jpg'
+          t 'https://lemmy.world/api/v3/post/list?community_name=memes&sort=Hot&limit=5'
+          t 'https://lemmy.world/feeds/c/memes.xml?sort=Hot'
+          t 'https://pleated-jeans.com/feed/'
+          t 'https://ruinmyweek.com/feed/'
+          t 'https://icanhas.cheezburger.com/rss'
+          t 'https://thechive.com/feed/'
+          t 'https://www.boredpanda.com/animals/feed/'
+          echo '--- node fetch'
+          node -e "for (const u of ['https://9gag.com/v1/group-posts/group/default/type/hot','https://lemmy.world/api/v3/post/list?community_name=memes&sort=Hot&limit=5']) fetch(u,{headers:{'User-Agent':process.env.UA,Accept:'application/json'}}).then(async r=>console.log(r.status,(await r.text()).length,u)).catch(e=>console.log('ERR',e.message,u))" 
+        env:
+          UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36
