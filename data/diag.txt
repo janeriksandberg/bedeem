@@ -1,29 +1,29 @@
-200 181335  https://9gag.com/
+200 181303  https://9gag.com/
    challenge-hits: 0
-200 181353  https://9gag.com/
-   challenge-hits: 0
-200 181353  https://9gag.com/
-   challenge-hits: 0
-200 181335  https://9gag.com/
-   challenge-hits: 0
-200 181353  https://9gag.com/
-   challenge-hits: 0
-200 181335  https://9gag.com/
-   challenge-hits: 0
-200 181335  https://9gag.com/
-   challenge-hits: 0
-200 181335  https://9gag.com/
-   challenge-hits: 0
-200 181353  https://9gag.com/
-   challenge-hits: 0
-200 181305  https://9gag.com/
-   challenge-hits: 0
-200 181335  https://9gag.com/
-   challenge-hits: 0
-200 181353  https://9gag.com/ -H Accept: text/html
+403 5561  https://9gag.com/hot
+   challenge-hits: 1
+403 5567  https://9gag.com/fresh
+   challenge-hits: 1
+403 5561  https://9gag.com/top
+   challenge-hits: 1
+403 5567  https://9gag.com/funny
+   challenge-hits: 1
+403 5600  https://9gag.com/wholesome
+   challenge-hits: 1
+403 5564  https://9gag.com/cute
+   challenge-hits: 1
+403 5567  https://9gag.com/comic
+   challenge-hits: 1
+403 5564  https://9gag.com/meme
+   challenge-hits: 1
+403 5594  https://9gag.com/animals
+   challenge-hits: 1
+403 5570  https://9gag.com/random
+   challenge-hits: 1
+200 181349  https://9gag.com/ -H Accept: text/html
    challenge-hits: 0
 403 5727  https://9gag.com/v1/group-posts/group/default/type/hot -H Accept: application/json
    challenge-hits: 1
 --- node fetch
-403 5791 https://9gag.com/v1/group-posts/group/default/type/hot
+403 5813 https://9gag.com/v1/group-posts/group/default/type/hot
 200 16415 https://lemmy.world/api/v3/post/list?community_name=memes&sort=Hot&limit=5
