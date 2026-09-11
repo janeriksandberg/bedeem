@@ -307,6 +307,33 @@ button { font: inherit; }
 .actions .star.on { color: var(--pink); border-color: var(--pink); background: var(--pink-soft); }
 .btn.star-btn { font-size: 19px; }
 
+/* ---------- Bildeinnlegg (memes): bildet fyller hele bredden av strømmen ---------- */
+.post.meme .title { font-size: 1rem; }
+.post.meme .pic {
+  display: block;
+  margin: .35rem -12px 0;          /* kant til kant på mobil (strømmen har 12px luft) */
+  text-decoration: none;
+}
+.post.meme.rare .pic { margin-left: 0; margin-right: 0; }
+.post.meme .pic img {
+  display: block;
+  width: 100%;
+  height: auto;                    /* width/height-attributtene gir riktig plass før bildet er lastet */
+  background: var(--tag);
+}
+/* Brede skjermer: naturlig størrelse (maks 700px fra kildene), midtstilt, aldri høyere enn skjermen. */
+@media (min-width: 700px) {
+  .post.meme .pic { margin-left: 0; margin-right: 0; }
+  .post.meme .pic img { width: auto; max-width: 100%; max-height: 90vh; margin: 0 auto; border-radius: 6px; }
+}
+.post.meme .pic.broken {
+  padding: 1.2rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: .9rem;
+}
+.post.meme .actions { margin-top: .35rem; }
+
 /* ---------- Tråd ---------- */
 .thread { margin-top: .6rem; }
 .thread .cnote { color: var(--muted); font-size: .85rem; margin-bottom: .4rem; }

@@ -6,6 +6,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+const execFileP = promisify(execFile);
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DATA_DIR = path.join(ROOT, 'data');
@@ -30,6 +33,10 @@ const LIMITS = {
   redditListedWindowH: 12, // uten nøkler hentes kommentarer bare til innlegg som stod i en liste de siste timene
   invisionTopicBudget: Number(process.env.INVISION_TOPIC_BUDGET || 20),
   invisionDelayMs: 1500,
+  // Bildekilder (memes): maks så mange bilder per kilde per kjøring, og maks sider å bla i.
+  imageItems: 50,
+  imagePages: 20, // 9gag gir 10 innlegg per side, hvorav bare 3–7 er rene bilder
+  imageDelayMs: 700,
 };
 
 const now = new Date();
@@ -60,6 +67,54 @@ async function fetchText(url, { headers = {}, timeout = 25000, method = 'GET', b
     }
   }
   throw lastErr;
+}
+// Noen tjenester (9gag) står bak Cloudflare og avviser Node sitt TLS-fingeravtrykk med en
+// «Just a moment»-utfordring, mens curl slipper gjennom. Da brukes curl om det finnes.
+let curlAvailable = null;
+async function fetchTextCurl(url, { headers = {}, timeout = 25000 } = {}) {
+  const args = ['-sS', '-L', '--max-time', String(Math.ceil(timeout / 1000)), '-A', UA, '-o', '-', '-w', '\n%{http_code}'];
+  for (const [k, v] of Object.entries(headers)) args.push('-H', `${k}: ${v}`);
+  args.push(url);
+  const { stdout } = await execFileP('curl', args, { maxBuffer: 20e6, encoding: 'utf8' });
+  const at = stdout.lastIndexOf('\n');
+  return { status: Number(stdout.slice(at + 1)) || 0, text: stdout.slice(0, at), ok: /^2/.test(stdout.slice(at + 1)), url };
+}
+const isChallenge = (res) => res.status === 403 && /Just a moment|cf-chl|challenge-platform/i.test(res.text.slice(0, 4000));
+async function fetchTextSmart(url, opts) {
+  if (curlAvailable !== false) {
+    try {
+      const res = await fetchTextCurl(url, opts);
+      curlAvailable = true;
+      if (!isChallenge(res)) return res;
+      log('curl fikk også Cloudflare-utfordring for', new URL(url).host);
+    } catch (e) {
+      if (curlAvailable === null) { curlAvailable = false; log('curl er ikke tilgjengelig:', e.message.split('\n')[0]); }
+      else throw e;
+    }
+  }
+  const res = await fetchText(url, opts);
+  if (isChallenge(res)) throw new Error('HTTP 403 (Cloudflare-utfordring)');
+  return res;
+}
+
+// Henter starten av en fil (til å lese bildestørrelse fra filhodet).
+async function fetchHead(url, bytes = 65535, timeout = 15000) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const res = await fetch(url, { redirect: 'follow', signal: ctrl.signal, headers: { 'User-Agent': UA, Range: `bytes=0-${bytes}` } });
+    if (res.status !== 200 && res.status !== 206) throw new Error(`HTTP ${res.status}`);
+    // Uten Range-støtte kommer hele fila; les bare det vi trenger.
+    const reader = res.body.getReader();
+    const chunks = []; let got = 0;
+    while (got <= bytes) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      chunks.push(value); got += value.length;
+    }
+    reader.cancel().catch(() => null);
+    return Buffer.concat(chunks);
+  } finally { clearTimeout(t); }
 }
 
 // ---------------------------------------------------------------- Tekst
@@ -589,7 +644,9 @@ async function fetchInvision(src, existing) {
     if (repliesM) item.commentCount = Number(repliesM[1]);
     if (!item.time || new Date(item.time) < time) item.time = iso(time);
     item.activity = iso(time);
-    if (!item.topicFetched && snippet && (!item.body || item.body.length < snippet.length)) item.body = snippet;
+    // Utdraget i strømmen er det nyeste innlegget i emnet. Bare når emnet nettopp er opprettet
+    // er det hovedinnlegget; ellers venter brødteksten til emnesiden er hentet.
+    if (isNewTopic && !item.topicFetched && snippet && (!item.body || item.body.length < snippet.length)) item.body = snippet;
     byTopic.set(id, item);
   }
   return { items: [...byTopic.values()] };
@@ -606,19 +663,19 @@ function parseLdJson(html) {
 }
 
 async function refreshInvisionTopics(items, status) {
+  // Rangering: aldri hentede emner først, deretter emner der hovedinnlegget mangler (hentet før
+  // rettelsen som leser det fra side 1), så emner med ny aktivitet.
+  const rank = (it) => (!it.topicFetched ? 0 : !it.opFetched ? 1 : 2);
   const candidates = items
     .filter((it) => {
-      if (!it.topicFetched) return true;
+      if (!it.topicFetched || !it.opFetched) return true;
       const since = now - new Date(it.commentsAt || 0);
       const idle = now - new Date(it.activity || it.time);
       if (idle > 72 * 3600e3) return false;
       // Har det kommet nye svar siden sist? Da haster det mer.
       return since > (idle < 3600e3 ? 1.5 : 6) * 3600e3;
     })
-    .sort((a, b) => {
-      if (!a.topicFetched !== !b.topicFetched) return a.topicFetched ? 1 : -1;
-      return new Date(b.activity || b.time) - new Date(a.activity || a.time);
-    })
+    .sort((a, b) => rank(a) - rank(b) || new Date(b.activity || b.time) - new Date(a.activity || a.time))
     .slice(0, LIMITS.invisionTopicBudget);
   let done = 0;
   for (const it of candidates) {
@@ -633,7 +690,22 @@ async function refreshInvisionTopics(items, status) {
       const created = parseDate(ld.dateCreated || ld.datePublished);
       if (created) it.created = iso(created);
       if (ld.author?.name) it.author = ld.author.name;
-      if (ld.text) it.body = truncate(cleanInvisionText(ld.text), LIMITS.bodyChars);
+      // «text» i JSON-LD er det første innlegget på DEN siden, ikke nødvendigvis hovedinnlegget.
+      // Står vi på side 2 eller senere, hentes hovedinnlegget fra side 1 (én gang per emne).
+      const onPage = Number((first.url.match(/\/page\/(\d+)\//) || [])[1]) || 1;
+      if (onPage === 1) {
+        if (ld.text) it.body = truncate(cleanInvisionText(ld.text), LIMITS.bodyChars);
+        it.opFetched = true;
+      } else if (!it.opFetched) {
+        await sleep(LIMITS.invisionDelayMs);
+        const p1 = await fetchText(it.url);
+        if (p1.status !== 200) throw new Error(`HTTP ${p1.status} (side 1)`);
+        const ld1 = parseLdJson(p1.text).find((j) => j && j['@type'] === 'DiscussionForumPosting');
+        if (!ld1) throw new Error('Fant ikke JSON-LD på side 1');
+        if (ld1.text) it.body = truncate(cleanInvisionText(ld1.text), LIMITS.bodyChars);
+        if (ld1.author?.name) it.author = ld1.author.name;
+        it.opFetched = true;
+      }
       const toComments = (arr) => (arr || []).map((c) => ({
         id: (c['@id'] || '').split('#')[1] || undefined,
         author: c.author?.name || 'Anonym',
@@ -835,6 +907,129 @@ async function fetchCisaKev(src) {
   return { items };
 }
 
+// --- Bildestørrelse fra filhodet (JPEG/PNG/GIF/WebP), så appen kan sette av plass før bildet er lastet.
+export function imageSizeFromBuffer(b) {
+  if (!b || b.length < 24) return null;
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) return { w: b.readUInt16LE(6), h: b.readUInt16LE(8) };
+  if (b[0] === 0xff && b[1] === 0xd8) {
+    let i = 2;
+    while (i + 9 < b.length) {
+      if (b[i] !== 0xff) { i++; continue; }
+      const marker = b[i + 1];
+      if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) { i += 2; continue; }
+      const len = b.readUInt16BE(i + 2);
+      if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+        return { h: b.readUInt16BE(i + 5), w: b.readUInt16BE(i + 7) };
+      }
+      i += 2 + len;
+    }
+    return null;
+  }
+  if (b.toString('latin1', 0, 4) === 'RIFF' && b.toString('latin1', 8, 12) === 'WEBP') {
+    const chunk = b.toString('latin1', 12, 16);
+    if (chunk === 'VP8 ' && b.length >= 30) return { w: b.readUInt16LE(26) & 0x3fff, h: b.readUInt16LE(28) & 0x3fff };
+    if (chunk === 'VP8L' && b.length >= 25) {
+      const bits = b.readUInt32LE(21);
+      return { w: (bits & 0x3fff) + 1, h: ((bits >> 14) & 0x3fff) + 1 };
+    }
+    if (chunk === 'VP8X' && b.length >= 30) return { w: (b.readUIntLE(24, 3)) + 1, h: (b.readUIntLE(27, 3)) + 1 };
+  }
+  return null;
+}
+async function imageSize(url) {
+  try {
+    const s = imageSizeFromBuffer(await fetchHead(url));
+    return s && s.w > 0 && s.h > 0 ? s : null;
+  } catch { return null; }
+}
+
+// --- Bored Panda: listeartikler («40 memes …»). Feeden (content:encoded) inneholder hele listen
+// som <h1>#N</h1><img src=…>, så vi slipper å hente artikkelsidene. Bare listebildene tas med;
+// andre bilder i teksten (forfatter, annonser, innfelte innlegg) hoppes over.
+async function fetchBoredPanda(src, existing) {
+  const { text, status } = await fetchText(src.url, { headers: { Accept: 'application/rss+xml, application/xml, text/xml' } });
+  if (status !== 200) throw new Error(`HTTP ${status}`);
+  const max = src.maxItems || LIMITS.imageItems;
+  const perArticle = src.maxPerArticle || max;
+  const items = [];
+  const articles = splitBlocks(text, 'item').map((b) => ({
+    title: htmlToText(tagText(b, 'title')),
+    link: stripTracking(tagText(b, 'link')),
+    author: htmlToText(tagText(b, 'dc:creator')),
+    date: parseDate(tagText(b, 'pubDate')),
+    html: tagText(b, 'content:encoded'),
+  })).filter((a) => a.link && a.html).sort((a, b) => (b.date || 0) - (a.date || 0));
+  for (const a of articles) {
+    if (items.length >= max) break;
+    // Overskrift «#N» (ev. med bildetekst) etterfulgt av bildet. Alt annet ignoreres.
+    const re = /<h[1-3][^>]*>\s*#\s*(\d+)\s*([^<]*)<\/h[1-3]>\s*(?:<p[^>]*>\s*<\/p>\s*)*(?:<a[^>]*>\s*)?<img\b([^>]*)>/gi;
+    let m; let n = 0;
+    while ((m = re.exec(a.html)) && n < perArticle && items.length < max) {
+      const attrs = m[3];
+      const srcM = attrs.match(/\s(?:data-src|src)=["']([^"']+)["']/i);
+      if (!srcM) continue;
+      const imgUrl = decodeEntities(srcM[1]);
+      if (!/^https?:\/\//i.test(imgUrl) || /\.(gif|svg)(\?|$)/i.test(imgUrl)) continue;
+      const num = Number(m[1]);
+      const caption = htmlToText(m[2]).trim();
+      const id = `${src.id}:${hash(imgUrl)}`;
+      const prev = existing.get(id);
+      n++;
+      items.push({
+        id,
+        source: src.id,
+        title: caption ? `#${num} ${caption}` : `${a.title} · #${num}`,
+        series: a.title,
+        url: a.link,
+        // Bildene i én artikkel får tider ett sekund fra hverandre, så #1 kommer først i strømmen.
+        time: iso(new Date((a.date || now).getTime() - (num - 1) * 1000)),
+        author: a.author || undefined,
+        body: '',
+        image: prev?.image?.w ? prev.image : { url: imgUrl, ...(await imageSize(imgUrl) || {}) },
+      });
+    }
+  }
+  return { items };
+}
+
+// --- 9gag: JSON-API-et bak forsiden. Bare rene bilder (ikke video/GIF), ikke NSFW.
+async function fetch9gag(src, existing) {
+  const max = src.maxItems || LIMITS.imageItems;
+  const base = `https://9gag.com/v1/group-posts/group/${encodeURIComponent(src.group9gag || 'default')}/type/${encodeURIComponent(src.listing || 'hot')}`;
+  const items = [];
+  let cursor = '';
+  for (let page = 0; page < LIMITS.imagePages && items.length < max; page++) {
+    if (page) await sleep(LIMITS.imageDelayMs);
+    const { text, status } = await fetchTextSmart(base + (cursor ? '?' + cursor : ''), { headers: { Accept: 'application/json' } });
+    if (status !== 200) throw new Error(`HTTP ${status}`);
+    const json = JSON.parse(text);
+    const posts = json?.data?.posts || [];
+    if (!posts.length) break;
+    for (const p of posts) {
+      if (items.length >= max) break;
+      if (p.type !== 'Photo' || p.nsfw || p.promoted) continue;
+      const img = p.images?.image700 || p.images?.image460;
+      if (!img?.url) continue;
+      const id = `${src.id}:${p.id}`;
+      const prev = existing.get(id);
+      items.push({
+        id,
+        source: src.id,
+        title: decodeEntities(p.title || '').trim() || '(uten tittel)',
+        url: `https://9gag.com/gag/${p.id}`,
+        time: prev?.time || iso(new Date((p.creationTs || 0) * 1000)),
+        author: p.creator?.username || undefined,
+        body: '',
+        image: { url: img.url, w: img.width, h: img.height },
+      });
+    }
+    cursor = json?.data?.nextCursor || '';
+    if (!cursor) break;
+  }
+  return { items };
+}
+
 function pick(arr) {
   if (!arr?.length) return '';
   return (arr.find((x) => /^(no|nb|nn)/i.test(x.language || '')) || arr[0]).value?.trim() || '';
@@ -926,6 +1121,8 @@ async function main() {
       else if (src.type === 'entur') result = await fetchEntur(src, all);
       else if (src.type === 'cisa-kev') result = await fetchCisaKev(src);
       else if (src.type === 'politiloggen') result = await fetchPolitiloggen(src, all);
+      else if (src.type === 'boredpanda') result = await fetchBoredPanda(src, all);
+      else if (src.type === '9gag') result = await fetch9gag(src, all);
       else throw new Error(`Ukjent kildetype ${src.type}`);
 
       let added = 0;

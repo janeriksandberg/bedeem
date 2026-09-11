@@ -459,6 +459,9 @@
     const rare = isRareSource(it.source);
     art.className = 'post' + (lastVisit && new Date(it.time).getTime() > lastVisit ? ' unread' : '') + (rare ? ' rare' : '');
     art.dataset.id = it.id;
+    // Bildeinnlegg (memes): bare tittel og bilde, bildet så bredt som strømmen tillater.
+    const img = it.image && safeUrl(it.image.url);
+    if (img) art.classList.add('meme');
 
     const meta = [];
     meta.push(`<span class="tag${it.severity ? ' sev-' + esc(it.severity) : ''}">${esc(src.short || src.name)}</span>`);
@@ -466,8 +469,8 @@
     if (settings.poop.includes(it.source)) meta.push('<span title="Nedprioritert kilde">💩</span>');
     if (rare) meta.push('<span class="rare-mark" title="Kilde som publiserer sjelden">sjelden</span>');
     meta.push(`<time datetime="${esc(it.time)}" title="${new Date(it.time).toLocaleString('nb-NO')}">${fmtTime(it.time)}</time>`);
-    if (it.author) meta.push(`<span>${esc(it.author)}</span>`);
-    if (it.category && src.type !== 'reddit') meta.push(`<span>${esc(it.category)}</span>`);
+    if (it.author && !img) meta.push(`<span>${esc(it.author)}</span>`);
+    if (it.category && src.type !== 'reddit' && !img) meta.push(`<span>${esc(it.category)}</span>`);
     if (it.ended) meta.push('<span class="tag ended">Avsluttet</span>');
     if (it.updated && it.updated !== it.time && !it.ended) meta.push(`<span>oppdatert ${fmtTime(it.updated)}</span>`);
 
@@ -486,12 +489,24 @@
     const starOn = isStarred(it.id);
     actions.push(`<button type="button" class="star${starOn ? ' on' : ''}" aria-pressed="${starOn}" title="${starOn ? 'Fjern stjerne' : 'Stjernemerk: ta vare på innlegget'}" aria-label="${starOn ? 'Fjern stjerne' : 'Stjernemerk innlegget'}">${starOn ? '★' : '☆'}</button>`);
 
+    const dims = img && it.image.w > 0 && it.image.h > 0 ? ` width="${Number(it.image.w)}" height="${Number(it.image.h)}"` : '';
+    const pic = img ? `<a class="pic" href="${esc(url || img)}" target="_blank" rel="noopener noreferrer"><img src="${esc(img)}"${dims} alt="${esc(it.title)}" loading="lazy" decoding="async"></a>` : '';
     art.innerHTML = `
       <div class="meta">${meta.join('')}</div>
       <h2 class="title">${url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(it.title)}</a>` : esc(it.title)}</h2>
-      ${hasBody ? `<div class="body clamp">${paragraphs(it.body)}</div>` : ''}
+      ${pic}
+      ${hasBody && !img ? `<div class="body clamp">${paragraphs(it.body)}</div>` : ''}
       <div class="actions">${actions.join('')}</div>`;
 
+    const imgEl = art.querySelector('.pic img');
+    if (imgEl) {
+      // Uten nett (og uten bufret bilde) vises en kort beskjed i stedet for et tomt felt.
+      imgEl.addEventListener('error', () => {
+        const a = imgEl.parentElement;
+        a.classList.add('broken');
+        a.textContent = state.offline ? 'Bildet er ikke tilgjengelig uten nett' : 'Bildet kunne ikke lastes';
+      });
+    }
     const thr = art.querySelector('.thr');
     if (thr) thr.addEventListener('click', () => toggleThread(art, it, thr));
     const starBtn = art.querySelector('.star');

@@ -34,6 +34,16 @@ Legg til et objekt i `sources` i `sources.json`. Støttede typer:
 | `entur`    | `stopPlaces`, `lines`, `authorities`, `keywords`, `url`  | Vy, tog Sande–Oslo       |
 
 | `cisa-kev` | `url` til CISA sin KEV-katalog (JSON)                    | CISA KEV                 |
+| `boredpanda` | `url` til en Bored Panda-feed, `maxItems`, `maxPerArticle` | Bored Panda · Funny   |
+| `9gag`     | `group9gag` (`default`, `meme`, `funny` …), `listing`, `maxItems` | 9GAG · Meme       |
+
+Bildekildene (gruppen «Memes») henter bare bilder: fra Bored Panda tas de nummererte
+listebildene i artikkelen (`<h1>#N</h1><img>` i feeden), ikke forfatterbilder, annonser
+eller innfelte innlegg; fra 9GAG tas bare innlegg av typen «Photo» (ikke video/GIF, ikke
+NSFW). Maks `maxItems` (50) bilder per kilde per kjøring. Bildene lenkes direkte fra
+kildenes CDN (de lagres ikke i repoet), og `Content-Security-Policy` i `index.html`
+må åpnes for CDN-vertene når nye bildekilder legges til. Bildene bufres ikke av
+service workeren, så uten nett vises bare tittelen.
 
 Alle kilder har `id` (unik, brukes i fil-ID-er), `name`, `short` (merkelapp i
 appen) og `group` (gruppering i Kilder-panelet). Sett `"enabled": false` for å
