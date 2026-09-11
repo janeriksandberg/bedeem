@@ -1,0 +1,31 @@
+403 5749  https://9gag.com/v1/group-posts/group/default/type/hot -H Accept: application/json
+   challenge-hits: 1
+403 5749  https://9gag.com/v1/group-posts/group/default/type/hot -H Accept: application/json --http1.1
+   challenge-hits: 1
+403 3232  https://9gag.com/v1/group-posts/group/default/type/hot -H Accept: application/json -H Referer: https://9gag.com/ -H Accept-Language: en-US,en;q=0.9 -H Accept-Encoding: gzip, deflate, br --compressed
+   challenge-hits: 1
+200 184649  https://9gag.com/
+   challenge-hits: 0
+403 5561  https://9gag.com/hot
+   challenge-hits: 1
+401 136  https://api.9gag.com/v2/post-list?group=1&type=hot&itemCount=10
+   challenge-hits: 0
+200 17500  https://img-9gag-fun.9cache.com/photo/abAj0yL_700b.jpg
+   challenge-hits: 0
+200 16416  https://lemmy.world/api/v3/post/list?community_name=memes&sort=Hot&limit=5
+   challenge-hits: 0
+200 23862  https://lemmy.world/feeds/c/memes.xml?sort=Hot
+   challenge-hits: 0
+200 796953  https://pleated-jeans.com/feed/
+   challenge-hits: 0
+200 183004  https://ruinmyweek.com/feed/
+   challenge-hits: 0
+200 178984  https://icanhas.cheezburger.com/rss
+   challenge-hits: 0
+200 65092  https://thechive.com/feed/
+   challenge-hits: 0
+200 486049  https://www.boredpanda.com/animals/feed/
+   challenge-hits: 0
+--- node fetch
+403 5813 https://9gag.com/v1/group-posts/group/default/type/hot
+200 16414 https://lemmy.world/api/v3/post/list?community_name=memes&sort=Hot&limit=5
