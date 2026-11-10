@@ -62,6 +62,7 @@
     loadedDays: 0,
     extraDays: 0,         // "Last inn eldre" utover bufferen
     starsOnly: false,     // ★ i toppen: vis bare stjernemerkede innlegg
+    hiddenShare: 0,       // andel av innleggene som er skjult (for å vite hvor mange dager som trengs)
   };
 
   // ---------- Hjelpere ----------
@@ -235,7 +236,7 @@
     saveSettings();
     applyBufferButtons();
     state.extraDays = 0;
-    loadFeed({ keepScroll: true });
+    loadFeed({ keepScroll: true }).then(() => refreshInBackground({ force: true }));
   }));
 
   // ---------- Status ----------
@@ -247,7 +248,7 @@
     const n = state.items.length;
     const gen = state.index?.generated;
     if (state.starsOnly) return `${Object.keys(stars).length} stjernemerkede innlegg${state.offline ? ' · frakoblet' : ''}`;
-    if (state.offline) return `Frakoblet · ${n} innlegg i buffer${gen ? ' · fra ' + fmtTime(gen) : ''}`;
+    if (state.offline) return `Frakoblet · ${n} lagrede innlegg${gen ? ' · fra ' + fmtTime(gen) : ''}`;
     return `${n} innlegg${gen ? ' · oppdatert ' + fmtTime(gen) : ''}`;
   }
 
@@ -319,23 +320,184 @@
     }
     return out;
   }
+  // ---------- Synk: atomisk bytte av lokalt innhold ----------
+  // Alt innhold som vises, leses fra en lokal cache (DATA_CACHE). Nytt innhold lastes først ned
+  // i sin helhet til en mellomlagringscache (STAGE_CACHE). Først når index.json OG alle dagsfilene
+  // som trengs for bufferen er komplett nedlastet og gyldige, flyttes de inn – og først da ryddes
+  // det som ikke lenger trengs. Ryker nettet underveis, beholdes det gamle uendret, og det som
+  // allerede er lastet ned, gjenbrukes neste gang (fortsetter der den slapp).
+  const DATA_CACHE = 'bedeem-data';    // samme navn i sw.js
+  const STAGE_CACHE = 'bedeem-staging';
+  const INDEX_URL = 'data/index.json';
+  const SIG_HEADER = 'X-Bedeem-Sig';
+  const IDLE_TIMEOUT = 25000;          // avbryt en nedlasting som ikke har fått nye bytes på 25 s
+  const MIN_SYNC_DAYS = 2;             // alltid i dag og i går, så midnatt ikke tømmer strømmen
+  const HIDDEN_MARGIN = 1.15;          // litt ekstra, siden noen innlegg filtreres bort
+  const hasCaches = typeof caches !== 'undefined' && window.isSecureContext;
+  const dayUrl = (day) => `data/days/${day}.json`;
+  const daySig = (d) => `${d.count}:${d.bytes}`;
+  const absUrl = (u) => new URL(u, location.href).href;
+
+  // Laster ned hele filen og tolker JSON. Tidsavbrudd når det står stille (ikke totalt), så store
+  // filer kommer gjennom på tregt nett, men et dødt tog-nett ikke henger for alltid.
+  async function download(url) {
+    const ctrl = new AbortController();
+    let timer;
+    const arm = () => { clearTimeout(timer); timer = setTimeout(() => ctrl.abort(), IDLE_TIMEOUT); };
+    arm();
+    try {
+      const res = await fetch(url, { cache: 'no-cache', signal: ctrl.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+      let text;
+      if (res.body && res.body.getReader) {
+        const reader = res.body.getReader();
+        const dec = new TextDecoder();
+        const parts = [];
+        for (;;) {
+          arm();
+          const { done, value } = await reader.read();
+          if (done) break;
+          parts.push(dec.decode(value, { stream: true }));
+        }
+        parts.push(dec.decode());
+        text = parts.join('');
+      } else text = await res.text();
+      return { text, json: JSON.parse(text) }; // ugyldig/avkuttet JSON kaster her
+    } finally { clearTimeout(timer); }
+  }
+  const jsonResponse = (text, sig) => new Response(text, { headers: { 'Content-Type': 'application/json', ...(sig ? { [SIG_HEADER]: sig } : {}) } });
+
+  async function readCached(url) {
+    if (!hasCaches) return null;
+    try {
+      const c = await caches.open(DATA_CACHE);
+      let res = await c.match(absUrl(url), { ignoreSearch: true });
+      // Første gang etter oppgradering: data kan ligge i en gammel cache (den nye service
+      // workeren flytter dem, men siden kan komme først). Kopier over uten å slette noe.
+      if (!res) {
+        res = await caches.match(absUrl(url), { ignoreSearch: true });
+        if (res && res.ok) await c.put(absUrl(url), res.clone());
+        else res = null;
+      }
+      if (!res) return null;
+      return { json: await res.json(), sig: res.headers.get(SIG_HEADER) };
+    } catch { return null; }
+  }
+
+  // Hvilke dager som trengs for å fylle bufferen (nyeste først).
+  function daysNeeded(index) {
+    const days = [...(index.days || [])].sort((a, b) => (a.day < b.day ? 1 : -1));
+    const want = settings.buffer * HIDDEN_MARGIN / Math.max(0.05, 1 - (state.hiddenShare || 0));
+    const out = [];
+    let n = 0;
+    for (const d of days) {
+      if (n >= want && out.length >= MIN_SYNC_DAYS + state.extraDays) break;
+      out.push(d);
+      n += d.count || 0;
+    }
+    return out;
+  }
+
+  let syncPromise = null;
+  // Henter nytt innhold. Svarer { changed, ok, error }. Kun én synk om gangen.
+  function sync() {
+    if (!syncPromise) syncPromise = doSync().finally(() => { syncPromise = null; });
+    return syncPromise;
+  }
+  async function doSync() {
+    if (!hasCaches) return { ok: false, changed: false, error: 'nocache' };
+    const data = await caches.open(DATA_CACHE);
+    const stage = await caches.open(STAGE_CACHE);
+    let index;
+    try {
+      ({ json: index } = await download(`${INDEX_URL}?t=${Date.now()}`));
+      if (!index || !Array.isArray(index.days)) throw new Error('ugyldig index');
+    } catch (e) {
+      return { ok: false, changed: false, error: String(e && e.message || e) };
+    }
+    const cur = await readCached(INDEX_URL);
+    // Eldre enn det vi har (f.eks. en mellomlagret kopi underveis): ikke gå bakover.
+    if (cur && cur.json.generated && index.generated && index.generated < cur.json.generated) {
+      return { ok: true, changed: false };
+    }
+    const need = daysNeeded(index);
+    const plan = [];
+    for (const d of need) {
+      const sig = daySig(d);
+      const have = await data.match(absUrl(dayUrl(d.day)));
+      if (have && have.headers.get(SIG_HEADER) === sig) continue; // uendret: ikke last ned på nytt
+      plan.push({ d, sig, key: absUrl(`${dayUrl(d.day)}?sig=${encodeURIComponent(sig)}`) });
+    }
+    // Fjern utdaterte mellomlagrede filer (andre versjoner enn de vi nå trenger).
+    const planKeys = new Set(plan.map((p) => p.key));
+    for (const req of await stage.keys()) if (!planKeys.has(req.url)) await stage.delete(req);
+
+    let got = 0;
+    for (const p of plan) {
+      if (await stage.match(p.key)) { got++; continue; } // lastet ned i et tidligere forsøk
+      setStatus(`Henter nytt … ${got + 1}/${plan.length}`);
+      try {
+        const { text, json } = await download(`${dayUrl(p.d.day)}?sig=${encodeURIComponent(p.sig)}`);
+        if (json.day && json.day !== p.d.day) throw new Error('feil dag');
+        await stage.put(p.key, jsonResponse(text, p.sig));
+        got++;
+      } catch (e) {
+        // Ufullstendig: ingenting byttes ut. Det som er lastet ned, ligger klart til neste forsøk.
+        return { ok: false, changed: false, partial: got, total: plan.length, error: String(e && e.message || e) };
+      }
+    }
+    if (!plan.length && cur && cur.json.generated === index.generated) return { ok: true, changed: false };
+
+    // Alt er på plass: bytt inn. Dagsfilene først, så index, så rydding.
+    for (const p of plan) {
+      const res = await stage.match(p.key);
+      await data.put(absUrl(dayUrl(p.d.day)), res);
+    }
+    await data.put(absUrl(INDEX_URL), jsonResponse(JSON.stringify(index)));
+    for (const p of plan) await stage.delete(p.key);
+    // Dagsfiler som ikke lenger står i index (eldre enn arkivet), kan nå trygt fjernes.
+    const listed = new Set(index.days.map((d) => absUrl(dayUrl(d.day))));
+    for (const req of await data.keys()) {
+      const u = req.url.split('?')[0];
+      if (u.includes('/data/days/') && !listed.has(u)) await data.delete(req);
+    }
+    return { ok: true, changed: true };
+  }
+
+  // Leser én dagsfil: fra lokal cache, ellers (om mulig) fra nett. En dag som ikke fantes lokalt,
+  // kan lagres med en gang – det legger bare til innhold, og fjerner ingenting.
+  async function readDay(d) {
+    const cached = await readCached(dayUrl(d.day));
+    if (cached) return cached.json;
+    if (!navigator.onLine && hasCaches) return null;
+    try {
+      const { text, json } = await download(`${dayUrl(d.day)}?sig=${encodeURIComponent(daySig(d))}`);
+      if (hasCaches) {
+        const c = await caches.open(DATA_CACHE);
+        if (!(await c.match(absUrl(dayUrl(d.day))))) await c.put(absUrl(dayUrl(d.day)), jsonResponse(text, daySig(d)));
+      }
+      return json;
+    } catch { return null; }
+  }
+
   async function loadFeed({ keepScroll = false } = {}) {
     if (state.loading) return;
     state.loading = true;
-    setStatus('Laster …');
-    let index;
-    try {
-      index = await fetchJson('data/index.json', { cache: 'no-store' });
-      state.offline = false;
-    } catch (e) {
-      state.offline = true;
-      if (!state.index) {
-        // Service worker gir oss bufret index om den finnes; hvis ikke, prøv uansett.
-        try { index = await fetchJson('data/index.json'); } catch { index = null; }
-      } else index = state.index;
+    if (!state.items.length) setStatus('Laster …');
+    let index = (await readCached(INDEX_URL))?.json || null;
+    if (!index) {
+      // Ingenting lagret ennå (første besøk): hent alt først.
+      setStatus('Henter innhold …');
+      const r = await sync();
+      state.offline = !r.ok;
+      index = (await readCached(INDEX_URL))?.json || null;
+      if (!index && !hasCaches) {
+        try { index = (await download(`${INDEX_URL}?t=${Date.now()}`)).json; state.offline = false; } catch { index = null; }
+      }
     }
     if (!index) {
       state.loading = false;
+      if (state.items.length) { setStatus(statusText(), true); return; } // behold det som vises
       setStatus('Ingen data tilgjengelig', true);
       feedEl.innerHTML = '<p class="empty">Fikk ikke kontakt med nettet, og det finnes ikke noe bufret innhold ennå. Prøv igjen når du har dekning.</p>';
       return;
@@ -353,26 +515,30 @@
     const want = settings.buffer;
     const items = [];
     let loadedDays = 0;
-    let failed = 0;
+    let missing = 0;
     const days = [...(index.days || [])].sort((a, b) => (a.day < b.day ? 1 : -1));
     for (const d of days) {
       const enough = items.filter((it) => !hidden.has(it.source)).length >= want;
       if (enough && loadedDays >= state.extraDays + 1) break;
-      try {
-        const j = await fetchJson(`data/days/${d.day}.json`, { cache: 'no-cache' });
+      const j = await readDay(d);
+      if (j) {
         items.push(...(j.items || []));
         loadedDays++;
-        if (loadedDays === 1 || loadedDays % 2 === 0) setStatus(`Laster … ${items.length}`);
-      } catch (e) {
-        failed++;
-        state.offline = true;
-      }
+        if (!state.items.length && (loadedDays === 1 || loadedDays % 2 === 0)) setStatus(`Laster … ${items.length}`);
+      } else missing++;
     }
     // Dedupliser (samme innlegg kan i sjeldne tilfeller ligge i to dagsfiler under flytting).
     const seen = new Set();
     const uniq = items.filter((it) => (seen.has(it.id) ? false : (seen.add(it.id), true)));
+    if (!uniq.length && state.items.length) {
+      // Fikk ikke lest noe: behold det som allerede vises.
+      state.loading = false;
+      setStatus(statusText(), true);
+      return;
+    }
     uniq.sort((a, b) => (a.time < b.time ? 1 : a.time > b.time ? -1 : 0));
     computeRateFallback(uniq);
+    state.hiddenShare = uniq.length ? uniq.filter((it) => hidden.has(it.source)).length / uniq.length : 0;
     // Oppfrisk kopiene av stjernemerkede innlegg (f.eks. nye svar) så lenge de finnes i arkivet.
     let starsChanged = false;
     for (const it of uniq) {
@@ -392,9 +558,45 @@
     renderReset();
     if (keepScroll) window.scrollTo(0, Math.min(y, document.body.scrollHeight));
     setStatus(statusText(), state.offline);
-    if (failed && uniq.length) showBanner(`Nettet forsvant underveis – viser ${state.items.length} bufrede innlegg.`);
-    else hideBanner();
+    if (missing && state.offline) showBanner(`Uten nett – viser ${state.items.length} lagrede innlegg.`);
     renderPanel();
+    prefetchImages();
+  }
+
+  // Henter nytt i bakgrunnen og bytter inn når alt er nedlastet. Står du øverst, vises det nye
+  // med en gang; har du bladd ned, får du et banner så strømmen ikke hopper under deg.
+  async function refreshInBackground({ force = false } = {}) {
+    if (!navigator.onLine && !force) return;
+    const r = await sync();
+    state.offline = !r.ok;
+    if (!r.ok) {
+      setStatus(statusText(), true);
+      if (r.partial) setStatus(`${statusText()} · fikk ${r.partial}/${r.total} nye filer, prøver igjen`, true);
+      return r;
+    }
+    if (r.changed) {
+      const atTop = window.scrollY < 200 && panelEl.hidden && aboutEl.hidden;
+      if (atTop || force) { hideBanner(); await loadFeed({ keepScroll: true }); }
+      else showBanner('Nytt innhold er lastet ned.', { label: 'Vis', fn: () => { hideBanner(); loadFeed(); window.scrollTo(0, 0); } });
+    } else setStatus(statusText(), false);
+    return r;
+  }
+
+  // ---------- Bilder: forhåndsnedlasting for lesing uten nett ----------
+  const MAX_PREFETCH_IMAGES = 600;     // bilder i bufferen som lastes ned på forhånd (viktigste først)
+  let imageCount = null;
+  function prefetchImages() {
+    if (!('serviceWorker' in navigator)) return;
+    const urls = [];
+    for (const it of state.items) {
+      const u = it.image && safeUrl(it.image.url);
+      if (u && u.startsWith('https://')) urls.push(u);
+      if (urls.length >= MAX_PREFETCH_IMAGES) break;
+    }
+    const keep = Object.values(stars).map((s) => s.image && safeUrl(s.image.url)).filter(Boolean);
+    navigator.serviceWorker.ready.then((reg) => {
+      if (reg.active) reg.active.postMessage({ type: 'prefetch-images', urls, keep });
+    }).catch(() => null);
   }
 
   // ---------- Rendering ----------
@@ -687,6 +889,7 @@
       ${sections.join('')}
       <div class="small">Valgene lagres på denne enheten (enhets-id ${esc(settings.device)}). Ingen pålogging.
       Innholdet hentes hvert 10. minutt og alt i bufferen kan leses uten nett.
+      Nytt innhold lastes ned i bakgrunnen og byttes inn først når alt er nede, så ingenting forsvinner hvis nettet ryker.<span id="imgCount">${imageCount != null ? ` ${imageCount} bilder er lagret for lesing uten nett.` : ''}</span>
       Nye kilder legges til i <code>sources.json</code>, bøker i <code>books.json</code>, i GitHub-repoet.</div>
       </div>`;
     panelEl.querySelectorAll('input[data-some]').forEach((cb) => { cb.indeterminate = true; });
@@ -816,22 +1019,20 @@
 
   // ---------- Oppdater / nett ----------
   $('#refresh').addEventListener('click', async () => {
-    const before = state.index?.generated;
-    await loadFeed();
-    if (before && state.index?.generated === before && !state.offline) setStatus(statusText() + ' · ingenting nytt');
+    hideBanner();
+    setStatus('Henter nytt …');
+    const r = await refreshInBackground({ force: true });
+    if (r && r.ok && !r.changed) setStatus(statusText() + ' · ingenting nytt');
+    else if (r && !r.ok && !r.partial) setStatus(`${statusText()} · fikk ikke kontakt – viser lagret innhold`, true);
   });
   $('#brand').addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
   window.addEventListener('online', () => { state.offline = false; setStatus(statusText()); checkForNew(); });
   window.addEventListener('offline', () => { state.offline = true; setStatus(statusText(), true); });
 
-  async function checkForNew() {
+  // Laster ned nytt i bakgrunnen så snart det er nett, så det ligger klart til neste tunnel.
+  function checkForNew() {
     if (!navigator.onLine || state.loading) return;
-    try {
-      const idx = await fetchJson('data/index.json', { cache: 'no-store' });
-      if (idx.generated !== state.index?.generated) {
-        showBanner('Det finnes nytt innhold.', { label: 'Hent', fn: () => { hideBanner(); loadFeed(); window.scrollTo(0, 0); } });
-      }
-    } catch { /* fortsatt frakoblet */ }
+    refreshInBackground().catch(() => null);
   }
   setInterval(checkForNew, 5 * 60 * 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) checkForNew(); });
@@ -839,6 +1040,14 @@
   // ---------- Service worker ----------
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => { /* fungerer også uten */ });
+    navigator.serviceWorker.addEventListener('message', (e) => {
+      const m = e.data || {};
+      if (m.type === 'images') {
+        imageCount = m.count;
+        const el = document.getElementById('imgCount');
+        if (el) el.textContent = ` ${imageCount} bilder er lagret for lesing uten nett.`;
+      }
+    });
     // Når en ny versjon av appen tar over, last siden på nytt én gang så den vises straks.
     let hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -856,8 +1065,11 @@
   applyBufferButtons();
   applyStarsButton();
   (async () => {
+    // Be nettleseren om ikke å rydde bort lagret innhold når lagringsplassen blir trang.
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => null); } catch { /* ignorer */ }
     await loadSources();
-    await loadFeed();
+    await loadFeed();              // viser lagret innhold med en gang, også uten nett
     try { localStorage.setItem(VISIT_KEY, String(Date.now())); } catch { /* ignorer */ }
+    await refreshInBackground();   // henter nytt og bytter inn når alt er nede
   })();
 })();

@@ -17,8 +17,17 @@ for sporadisk nettilgang. Publiseres med GitHub Pages på <https://bedeem.com>.
 - **Nettsiden** (`index.html`, `app.js`, `styles.css`) laster `data/index.json`
   og så mange dagsfiler som trengs for å fylle bufferen (50, 100 eller 1000
   innlegg, standard 1000). Alt vises i én uendelig strøm.
-- **`sw.js`** (service worker) bufrer appen og alle nedlastede datafiler, slik at
-  siden fortsetter å virke når nettet forsvinner.
+- **Lesing uten nett.** Appen viser alltid det som ligger lagret lokalt først, og henter nytt
+  i bakgrunnen (ved oppstart, hvert 5. minutt, når nettet kommer tilbake og ved ↻). Nytt
+  innhold lastes ned helt til en mellomlagringscache og byttes inn i ett jafs først når
+  `index.json` og alle dagsfilene som trengs for bufferen er komplett og gyldig. Ryker nettet
+  underveis, beholdes det gamle uendret, og det som allerede er hentet, gjenbrukes neste gang.
+  Dagsfiler som ikke er endret (samme antall og størrelse i `index.json`), lastes ikke ned på
+  nytt. Ingenting lokalt slettes før det nye er på plass.
+- **`sw.js`** (service worker) bufrer appen og bildene. Data og bilder ligger i egne cacher som
+  overlever nye app-versjoner; en ny versjon tas bare i bruk når alle appfilene er lastet ned.
+  Bilder fjernes fra bildecachen først når en ny runde med forhåndsnedlasting er fullført uten
+  nettfeil, og aldri hvis de hører til et stjernemerket innlegg.
 - Innstillinger (tekststørrelse, bufferstørrelse, skjulte kilder) lagres per
   enhet i `localStorage`. Ingen pålogging.
 
@@ -48,8 +57,9 @@ JSON-API-et bak avvises av Cloudflare fra GitHub sine adresser; svarer API-et li
 hentes flere sider. Maks `maxItems` (50) bilder per kilde per kjøring. Bildestørrelsen
 leses fra filhodet når kilden ikke oppgir den, så appen setter av riktig plass før
 bildet er lastet. Bildene lenkes direkte fra kildene (de lagres ikke i repoet; derfor
-tillater `Content-Security-Policy` i `index.html` bilder fra alle `https:`-verter), og de
-bufres ikke av service workeren, så uten nett vises bare tittelen.
+tillater `Content-Security-Policy` i `index.html` bilder fra alle `https:`-verter). Service
+workeren laster ned bildene i bufferen på forhånd (opptil 600, nyeste først) til en egen
+bildecache, så de kan vises uten nett.
 
 Alle kilder har `id` (unik, brukes i fil-ID-er), `name`, `short` (merkelapp i
 appen) og `group` (gruppering i Kilder-panelet). Sett `"enabled": false` for å
